@@ -1,0 +1,25 @@
+FROM golang:1.14 AS build-env
+
+WORKDIR /go/src/github.com/howood/mogiecollector
+
+ADD application /go/src/github.com/howood/mogiecollector/application
+ADD domain /go/src/github.com/howood/mogiecollector/domain
+ADD mogiecollector-api /go/src/github.com/howood/mogiecollector/mogiecollector-api
+ADD infrastructure /go/src/github.com/howood/mogiecollector/infrastructure
+ADD interfaces /go/src/github.com/howood/mogiecollector/interfaces
+ADD library /go/src/github.com/howood/mogiecollector/library
+ADD templates /go/templates
+ADD go.mod /go/src/github.com/howood/mogiecollector/go.mod
+ADD go.sum /go/src/github.com/howood/mogiecollector/go.sum
+
+
+RUN \
+     cd /go/src/github.com/howood/mogiecollector/mogiecollector-api &&  \
+     export GO111MODULE=on && CGO_ENABLED=0 go install
+
+
+FROM busybox
+COPY --from=build-env /etc/ssl/certs /etc/ssl/certs
+COPY --from=build-env /go/bin/mogiecollector-api /usr/local/bin/mogiecollector-api
+COPY --from=build-env /go/templates /go/templates
+ENTRYPOINT ["/usr/local/bin/mogiecollector-api"]
