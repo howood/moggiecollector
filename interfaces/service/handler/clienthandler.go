@@ -6,7 +6,7 @@ import (
 
 	log "github.com/howood/moggiecollector/infrastructure/logger"
 	"github.com/howood/moggiecollector/infrastructure/requestid"
-	"github.com/howood/moggiecollector/interfaces/service/config"
+	"github.com/howood/moggiecollector/interfaces/service/usecase"
 	"github.com/labstack/echo/v4"
 )
 
@@ -24,7 +24,7 @@ func (ch ClientHandler) GetProfile(c echo.Context) error {
 	log.Info(ch.ctx, c.Request().Method)
 	log.Info(ch.ctx, c.Request().Header)
 	claims := ch.getClaimsFromToken(c)
-	user, err := config.GetDataStore().User.GetByIDAndEmail(claims.UserID, claims.Name)
+	user, err := usecase.ClientUsecase{}.GetUserByToken(claims)
 	if err != nil {
 		return ch.errorResponse(c, http.StatusBadRequest, err)
 	}
