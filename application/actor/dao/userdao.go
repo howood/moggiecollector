@@ -20,28 +20,35 @@ func NewUsersDao(ctx context.Context, instance datastore.DatastoreInstance) repo
 	return &UsersDao{ctx: ctx, instance: instance}
 }
 
-//GetAll is get all
+// GetAll is get all
 func (u *UsersDao) GetAll() ([]entity.User, error) {
 	users := make([]entity.User, 0)
 	err := u.instance.GetClient().Where("status IN (?)", []entity.UserStatus{entity.UserStatusActive}).Order("user_id desc").Find(&users).Error
 	return users, err
 }
 
-//GetAllWithInActive is get all
+// GetAllWithInActive is get all
 func (u *UsersDao) GetAllWithInActive() ([]entity.User, error) {
 	users := make([]entity.User, 0)
 	err := u.instance.GetClient().Where("status IN (?)", []entity.UserStatus{entity.UserStatusActive, entity.UserStatusInActive}).Order("user_id desc").Find(&users).Error
 	return users, err
 }
 
-//Get is get by id
+// Get is get by id
 func (u *UsersDao) Get(userID uint64) (entity.User, error) {
 	user := entity.User{}
 	err := u.instance.GetClient().Where("status = ? AND user_id = ?", entity.UserStatusActive, userID).First(&user).Error
 	return user, err
 }
 
-//Create is create new user
+// GetByIDAndEmail is get by id and email
+func (u *UsersDao) GetByIDAndEmail(userID uint64, email string) (entity.User, error) {
+	user := entity.User{}
+	err := u.instance.GetClient().Where("status = ? AND user_id = ? AND email = ?", entity.UserStatusActive, userID, email).First(&user).Error
+	return user, err
+}
+
+// Create is create new user
 func (u *UsersDao) Create(name, email, password string) error {
 	user, err := u.set(name, email, password)
 	if err != nil {
@@ -56,7 +63,7 @@ func (u *UsersDao) Create(name, email, password string) error {
 	return nil
 }
 
-//Update is update exist user
+// Update is update exist user
 func (u *UsersDao) Update(userID uint64, name, email, password string) error {
 	user, err := u.set(name, email, password)
 	if err != nil {
@@ -70,7 +77,7 @@ func (u *UsersDao) Update(userID uint64, name, email, password string) error {
 
 }
 
-//InActive is update exist user
+// InActive is update exist user
 func (u *UsersDao) InActive(userID uint64) error {
 	return u.instance.GetClient().Model(&entity.User{}).Where(
 		"status = ? AND user_id = ?",
@@ -80,7 +87,7 @@ func (u *UsersDao) InActive(userID uint64) error {
 
 }
 
-//Auth is authorize user
+// Auth is authorize user
 func (u *UsersDao) Auth(email, password string) (entity.User, error) {
 	user := entity.User{}
 	if err := u.instance.GetClient().Where("status = ? AND email = ?", entity.UserStatusActive, email).First(&user).Error; err != nil {

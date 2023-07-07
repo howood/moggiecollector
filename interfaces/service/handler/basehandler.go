@@ -5,7 +5,10 @@ import (
 	"net/http"
 	"strings"
 
+	jwt "github.com/golang-jwt/jwt/v5"
+	"github.com/howood/moggiecollector/application/actor"
 	"github.com/howood/moggiecollector/application/validator"
+	"github.com/howood/moggiecollector/domain/entity"
 	"github.com/howood/moggiecollector/interfaces/service/config"
 	"github.com/labstack/echo/v4"
 )
@@ -34,4 +37,10 @@ func (bh BaseHandler) setResponseHeader(c echo.Context, lastmodified, contentlen
 func (bh BaseHandler) validate(stc interface{}) error {
 	val := validator.NewValidator(bh.ctx)
 	return val.Validate(stc)
+}
+
+func (bh BaseHandler) getClaimsFromToken(c echo.Context) *entity.JwtClaims {
+	user := c.Get(actor.JWTContextKey).(*jwt.Token)
+	claims := user.Claims.(*entity.JwtClaims)
+	return claims
 }

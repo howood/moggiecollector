@@ -3,8 +3,13 @@ package main
 import (
 	"fmt"
 
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/howood/moggiecollector/application/actor"
+	"github.com/howood/moggiecollector/domain/entity"
+	"github.com/howood/moggiecollector/infrastructure/custommiddleware"
 	"github.com/howood/moggiecollector/interfaces/service/handler"
 	"github.com/howood/moggiecollector/library/utils"
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -25,6 +30,16 @@ func main() {
 	e.DELETE("/users/:id", handler.AccountHandler{}.InActiveUser)
 
 	e.POST("/login", handler.AccountHandler{}.Login)
+
+	jwtconfig := echojwt.Config{
+		Skipper: custommiddleware.OptionsMethodSkipper,
+		NewClaimsFunc: func(c echo.Context) jwt.Claims {
+			return new(entity.JwtClaims)
+		},
+		SigningKey: []byte(actor.TokenSecret),
+		ContextKey: actor.JWTContextKey,
+	}
+	e.GET("/profile", handler.ClientHandler{}.GetProfile, echojwt.WithConfig(jwtconfig))
 
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", DefaultPort)))
 

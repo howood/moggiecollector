@@ -54,7 +54,7 @@ func gormConfig() gorm.Option {
 			SlowThreshold:             time.Second,
 			LogLevel:                  logger.Info,
 			IgnoreRecordNotFoundError: true,
-			ParameterizedQueries:      true,
+			ParameterizedQueries:      false,
 			Colorful:                  false,
 		},
 	)

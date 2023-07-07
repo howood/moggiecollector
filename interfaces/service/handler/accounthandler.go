@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/howood/moggiecollector/application/actor"
 	"github.com/howood/moggiecollector/domain/entity"
 	log "github.com/howood/moggiecollector/infrastructure/logger"
 	"github.com/howood/moggiecollector/infrastructure/requestid"
@@ -130,6 +131,7 @@ func (ch AccountHandler) Login(c echo.Context) error {
 	log.Info(ch.ctx, c.Request().Method)
 	log.Info(ch.ctx, c.Request().Header)
 	form := entity.LoginUserForm{}
+	var token string
 	var err error
 	if err == nil {
 		err = c.Bind(&form)
@@ -144,5 +146,14 @@ func (ch AccountHandler) Login(c echo.Context) error {
 	if err != nil {
 		return ch.errorResponse(c, http.StatusBadRequest, err)
 	}
-	return c.JSONPretty(http.StatusOK, user, marshalIndent)
+	if err == nil {
+		token, err = ch.createToken(user.UserID, user.Email)
+	}
+	return c.JSONPretty(http.StatusOK, map[string]interface{}{"token": token}, marshalIndent)
+}
+
+func (ch AccountHandler) createToken(userId uint64, username string) (string, error) {
+	jwtinstance := actor.NewJwtOperator(ch.ctx, userId, username, false, "moggiecollector-api")
+	tokenstr := jwtinstance.CreateToken(actor.TokenSecret)
+	return tokenstr, nil
 }
