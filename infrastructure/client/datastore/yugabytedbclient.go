@@ -2,10 +2,13 @@ package datastore
 
 import (
 	"fmt"
+	"log"
 	"os"
+	"time"
 
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 
 	"github.com/howood/moggiecollector/library/utils"
 )
@@ -32,17 +35,33 @@ func generateConnection() *gorm.DB {
 		os.Getenv("YUGABYTEDB_PASSWORD"),
 	)
 
-	dbInstance, err := gorm.Open("postgres", dbURI)
+	dbInstance, err := gorm.Open(postgres.Open(dbURI), gormConfig())
 	if err != nil {
 		panic(err)
 	}
-	dbInstance.LogMode(true)
 	err = dbInstance.Exec("SET SESSION CHARACTERISTICS AS TRANSACTION ISOLATION LEVEL SERIALIZABLE").Error
 	if err != nil {
 		panic(err)
 	}
 
 	return dbInstance
+}
+
+func gormConfig() gorm.Option {
+	newLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold:             time.Second,
+			LogLevel:                  logger.Info,
+			IgnoreRecordNotFoundError: true,
+			ParameterizedQueries:      true,
+			Colorful:                  false,
+		},
+	)
+
+	return &gorm.Config{
+		Logger: newLogger,
+	}
 }
 
 func (yc *YugaByteDbClient) GetClient() *gorm.DB {
