@@ -5,15 +5,14 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/howood/moggiecollector/application/actor"
 	"github.com/howood/moggiecollector/domain/entity"
 	log "github.com/howood/moggiecollector/infrastructure/logger"
 	"github.com/howood/moggiecollector/infrastructure/requestid"
-	"github.com/howood/moggiecollector/interfaces/service/config"
+	"github.com/howood/moggiecollector/interfaces/service/usecase"
 	"github.com/labstack/echo/v4"
 )
 
-// ClientHandler struct
+// AccountHandler struct
 type AccountHandler struct {
 	BaseHandler
 }
@@ -27,13 +26,7 @@ func (ch AccountHandler) GetUsers(c echo.Context) error {
 	log.Info(ch.ctx, c.Request().Method)
 	log.Info(ch.ctx, c.Request().Header)
 	withinactive := c.QueryParam("withinactive")
-	var err error
-	var users []entity.User
-	if withinactive == "true" {
-		users, err = config.GetDataStore().User.GetAllWithInActive()
-	} else {
-		users, err = config.GetDataStore().User.GetAll()
-	}
+	users, err := usecase.AccountUsecase{}.GetUsers(withinactive)
 	if err != nil {
 		return ch.errorResponse(c, http.StatusBadRequest, err)
 	}
@@ -49,7 +42,7 @@ func (ch AccountHandler) GetUser(c echo.Context) error {
 	log.Info(ch.ctx, c.Request().Method)
 	log.Info(ch.ctx, c.Request().Header)
 	userid, _ := strconv.Atoi(c.Param("id"))
-	user, err := config.GetDataStore().User.Get(uint64(userid))
+	user, err := usecase.AccountUsecase{}.GetUser(userid)
 	if err != nil {
 		return ch.errorResponse(c, http.StatusBadRequest, err)
 	}
@@ -75,7 +68,8 @@ func (ch AccountHandler) CreateUser(c echo.Context) error {
 	if err != nil {
 		return ch.errorResponse(c, http.StatusBadRequest, err)
 	}
-	if err := config.GetDataStore().User.Create(form.Name, form.Email, form.Password); err != nil {
+	err = usecase.AccountUsecase{}.CreateUser(form)
+	if err != nil {
 		return ch.errorResponse(c, http.StatusBadRequest, err)
 	}
 	return c.JSONPretty(http.StatusOK, map[string]interface{}{"message": "success"}, marshalIndent)
@@ -101,7 +95,8 @@ func (ch AccountHandler) UpdateUser(c echo.Context) error {
 	if err != nil {
 		return ch.errorResponse(c, http.StatusBadRequest, err)
 	}
-	if err := config.GetDataStore().User.Update(uint64(userid), form.Name, form.Email, form.Password); err != nil {
+	err = usecase.AccountUsecase{}.UpdateUser(userid, form)
+	if err != nil {
 		return ch.errorResponse(c, http.StatusBadRequest, err)
 	}
 	return c.JSONPretty(http.StatusOK, map[string]interface{}{"message": "success"}, marshalIndent)
@@ -116,7 +111,8 @@ func (ch AccountHandler) InActiveUser(c echo.Context) error {
 	log.Info(ch.ctx, c.Request().Method)
 	log.Info(ch.ctx, c.Request().Header)
 	userid, _ := strconv.Atoi(c.Param("id"))
-	if err := config.GetDataStore().User.InActive(uint64(userid)); err != nil {
+	err := usecase.AccountUsecase{}.InActiveUser(userid)
+	if err != nil {
 		return ch.errorResponse(c, http.StatusBadRequest, err)
 	}
 	return c.JSONPretty(http.StatusOK, map[string]interface{}{"message": "success"}, marshalIndent)
@@ -142,7 +138,7 @@ func (ch AccountHandler) Login(c echo.Context) error {
 	if err != nil {
 		return ch.errorResponse(c, http.StatusBadRequest, err)
 	}
-	user, err := config.GetDataStore().User.Auth(form.Email, form.Password)
+	user, err := usecase.AccountUsecase{}.AuthUser(form)
 	if err != nil {
 		return ch.errorResponse(c, http.StatusBadRequest, err)
 	}
@@ -150,10 +146,4 @@ func (ch AccountHandler) Login(c echo.Context) error {
 		token, err = ch.createToken(user.UserID, user.Email)
 	}
 	return c.JSONPretty(http.StatusOK, map[string]interface{}{"token": token}, marshalIndent)
-}
-
-func (ch AccountHandler) createToken(userId uint64, username string) (string, error) {
-	jwtinstance := actor.NewJwtOperator(ch.ctx, userId, username, false, "moggiecollector-api")
-	tokenstr := jwtinstance.CreateToken(actor.TokenSecret)
-	return tokenstr, nil
 }
