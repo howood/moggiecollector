@@ -1,6 +1,6 @@
 package datastore
 
-import "github.com/jinzhu/gorm"
+import "gorm.io/gorm"
 
 // DatastoreInstance interface
 type DatastoreInstance interface {
