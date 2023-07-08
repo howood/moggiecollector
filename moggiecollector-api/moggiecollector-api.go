@@ -7,7 +7,7 @@ import (
 	"github.com/howood/moggiecollector/application/actor"
 	"github.com/howood/moggiecollector/domain/entity"
 	"github.com/howood/moggiecollector/infrastructure/custommiddleware"
-	"github.com/howood/moggiecollector/interfaces/service/handler"
+	"github.com/howood/moggiecollector/interfaces/handler"
 	"github.com/howood/moggiecollector/library/utils"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"

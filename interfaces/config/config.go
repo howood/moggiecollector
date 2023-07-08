@@ -3,8 +3,8 @@ package config
 import (
 	"context"
 
-	"github.com/howood/moggiecollector/application/actor/dao"
 	"github.com/howood/moggiecollector/application/actor/datastoreservice"
+	"github.com/howood/moggiecollector/application/actor/datastoreservice/dao"
 	"github.com/howood/moggiecollector/domain/entity"
 	"github.com/howood/moggiecollector/domain/repository"
 )

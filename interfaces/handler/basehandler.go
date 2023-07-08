@@ -9,7 +9,7 @@ import (
 	"github.com/howood/moggiecollector/application/actor"
 	"github.com/howood/moggiecollector/application/validator"
 	"github.com/howood/moggiecollector/domain/entity"
-	"github.com/howood/moggiecollector/interfaces/service/config"
+	"github.com/howood/moggiecollector/interfaces/config"
 	"github.com/labstack/echo/v4"
 )
 
