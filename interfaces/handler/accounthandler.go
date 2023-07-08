@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/howood/moggiecollector/application/usecase"
 	"github.com/howood/moggiecollector/domain/entity"
 	log "github.com/howood/moggiecollector/infrastructure/logger"
 	"github.com/howood/moggiecollector/infrastructure/requestid"
-	"github.com/howood/moggiecollector/interfaces/service/usecase"
 	"github.com/labstack/echo/v4"
 )
 

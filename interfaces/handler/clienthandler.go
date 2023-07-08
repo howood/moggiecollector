@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/howood/moggiecollector/application/usecase"
 	log "github.com/howood/moggiecollector/infrastructure/logger"
 	"github.com/howood/moggiecollector/infrastructure/requestid"
-	"github.com/howood/moggiecollector/interfaces/service/usecase"
 	"github.com/labstack/echo/v4"
 )
 
