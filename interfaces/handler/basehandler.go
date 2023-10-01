@@ -47,6 +47,6 @@ func (bh BaseHandler) getClaimsFromToken(c echo.Context) *entity.JwtClaims {
 
 func (ch AccountHandler) createToken(userId uint64, username string) (string, error) {
 	jwtinstance := actor.NewJwtOperator(ch.ctx, userId, username, false, "moggiecollector-api")
-	tokenstr := jwtinstance.CreateToken(actor.TokenSecret)
+	tokenstr := jwtinstance.CreateToken()
 	return tokenstr, nil
 }
