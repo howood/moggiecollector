@@ -5,7 +5,6 @@ import (
 
 	"github.com/howood/moggiecollector/application/actor"
 	"github.com/howood/moggiecollector/domain/entity"
-	"github.com/howood/moggiecollector/domain/repository"
 	"github.com/howood/moggiecollector/infrastructure/client/datastore"
 )
 
@@ -16,7 +15,7 @@ type UsersDao struct {
 }
 
 // NewUsersDao creates a new UserRepository
-func NewUsersDao(ctx context.Context, instance datastore.DatastoreInstance) repository.UserRepository {
+func NewUsersDao(ctx context.Context, instance datastore.DatastoreInstance) *UsersDao {
 	return &UsersDao{ctx: ctx, instance: instance}
 }
 
