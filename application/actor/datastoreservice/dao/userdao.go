@@ -47,6 +47,13 @@ func (u *UsersDao) GetByIDAndEmail(userID uint64, email string) (entity.User, er
 	return user, err
 }
 
+// GetByEmail is get by  email
+func (u *UsersDao) GetByEmail(email string) (entity.User, error) {
+	user := entity.User{}
+	err := u.instance.GetClient().Where("status = ? AND email = ?", entity.UserStatusActive, email).First(&user).Error
+	return user, err
+}
+
 // Create is create new user
 func (u *UsersDao) Create(name, email, password string) error {
 	user, err := u.set(name, email, password)
@@ -114,4 +121,9 @@ func (u *UsersDao) set(name, email, password string) (entity.User, error) {
 		Password: hashedpassword,
 		Salt:     salt,
 	}, nil
+}
+
+// RecordNotFoundError is check error as record not found
+func (u *UsersDao) RecordNotFoundError(err error) bool {
+	return u.instance.RecordNotFoundError(err)
 }

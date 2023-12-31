@@ -10,8 +10,10 @@ type UserRepository interface {
 	GetAllWithInActive() ([]entity.User, error)
 	Get(userID uint64) (entity.User, error)
 	GetByIDAndEmail(userID uint64, email string) (entity.User, error)
+	GetByEmail(email string) (entity.User, error)
 	Create(name, email, password string) error
 	Update(userID uint64, name, email, password string) error
 	InActive(userID uint64) error
 	Auth(email, password string) (entity.User, error)
+	RecordNotFoundError(err error) bool
 }

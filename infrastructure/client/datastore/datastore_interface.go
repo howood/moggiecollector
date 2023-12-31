@@ -6,4 +6,5 @@ import "gorm.io/gorm"
 type DatastoreInstance interface {
 	GetClient() *gorm.DB
 	Migrate(tables []interface{})
+	RecordNotFoundError(err error) bool
 }

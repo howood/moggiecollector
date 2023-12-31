@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"errors"
+
 	"github.com/howood/moggiecollector/domain/entity"
 	"github.com/howood/moggiecollector/interfaces/config"
 )
@@ -21,6 +23,13 @@ func (au AccountUsecase) GetUser(userid int) (entity.User, error) {
 }
 
 func (au AccountUsecase) CreateUser(form entity.CreateUserForm) error {
+	_, err := config.GetDataStore().User.GetByEmail(form.Email)
+	if err != nil && !config.GetDataStore().User.RecordNotFoundError(err) {
+		return err
+	}
+	if err == nil {
+		return errors.New("exist user with requested email")
+	}
 	return config.GetDataStore().User.Create(form.Name, form.Email, form.Password)
 }
 
