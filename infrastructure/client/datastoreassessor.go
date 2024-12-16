@@ -1,4 +1,4 @@
-package datastoreservice
+package client
 
 import (
 	"context"
