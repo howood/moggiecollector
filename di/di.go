@@ -1,15 +1,15 @@
-package config
+package di
 
 import (
 	"context"
 
-	"github.com/howood/moggiecollector/application/actor/datastoreservice"
-	"github.com/howood/moggiecollector/application/actor/datastoreservice/dao"
 	"github.com/howood/moggiecollector/domain/entity"
 	"github.com/howood/moggiecollector/domain/repository"
+	"github.com/howood/moggiecollector/infrastructure/client"
+	"github.com/howood/moggiecollector/infrastructure/client/datastore/dao"
 )
 
-var RecordNotFoundMsg = datastoreservice.RecordNotFoundMsg
+var RecordNotFoundMsg = client.RecordNotFoundMsg
 
 type DataStore struct {
 	User repository.UserRepository
@@ -28,7 +28,7 @@ func init() {
 func configureDatastore() (DataStore, error) {
 	ctx := context.Background()
 	configureddbstore := DataStore{}
-	dataaccessor := datastoreservice.NewDatastorAssessor(ctx)
+	dataaccessor := client.NewDatastorAssessor(ctx)
 	tables := []interface{}{
 		&entity.User{},
 	}

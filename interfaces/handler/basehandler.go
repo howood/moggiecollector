@@ -8,8 +8,8 @@ import (
 	jwt "github.com/golang-jwt/jwt/v5"
 	"github.com/howood/moggiecollector/application/actor"
 	"github.com/howood/moggiecollector/application/validator"
+	"github.com/howood/moggiecollector/di"
 	"github.com/howood/moggiecollector/domain/entity"
-	"github.com/howood/moggiecollector/interfaces/config"
 	"github.com/labstack/echo/v4"
 )
 
@@ -21,7 +21,7 @@ type BaseHandler struct {
 }
 
 func (bh BaseHandler) errorResponse(c echo.Context, statudcode int, err error) error {
-	if strings.Contains(strings.ToLower(err.Error()), config.RecordNotFoundMsg) {
+	if strings.Contains(strings.ToLower(err.Error()), di.RecordNotFoundMsg) {
 		statudcode = http.StatusNotFound
 	}
 	c.Response().Header().Set(echo.HeaderXRequestID, bh.ctx.Value(echo.HeaderXRequestID).(string))
