@@ -26,7 +26,7 @@ func (ch AccountHandler) GetUsers(c echo.Context) error {
 	log.Info(ch.ctx, c.Request().Method)
 	log.Info(ch.ctx, c.Request().Header)
 	withinactive := c.QueryParam("withinactive")
-	users, err := usecase.AccountUsecase{}.GetUsers(withinactive)
+	users, err := usecase.AccountUsecase{Ctx: ch.ctx}.GetUsers(withinactive)
 	if err != nil {
 		return ch.errorResponse(c, http.StatusBadRequest, err)
 	}
@@ -42,7 +42,7 @@ func (ch AccountHandler) GetUser(c echo.Context) error {
 	log.Info(ch.ctx, c.Request().Method)
 	log.Info(ch.ctx, c.Request().Header)
 	userid, _ := strconv.Atoi(c.Param("id"))
-	user, err := usecase.AccountUsecase{}.GetUser(userid)
+	user, err := usecase.AccountUsecase{Ctx: ch.ctx}.GetUser(userid)
 	if err != nil {
 		return ch.errorResponse(c, http.StatusBadRequest, err)
 	}
@@ -68,7 +68,7 @@ func (ch AccountHandler) CreateUser(c echo.Context) error {
 	if err != nil {
 		return ch.errorResponse(c, http.StatusBadRequest, err)
 	}
-	err = usecase.AccountUsecase{}.CreateUser(form)
+	err = usecase.AccountUsecase{Ctx: ch.ctx}.CreateUser(form)
 	if err != nil {
 		return ch.errorResponse(c, http.StatusBadRequest, err)
 	}
@@ -95,7 +95,7 @@ func (ch AccountHandler) UpdateUser(c echo.Context) error {
 	if err != nil {
 		return ch.errorResponse(c, http.StatusBadRequest, err)
 	}
-	err = usecase.AccountUsecase{}.UpdateUser(userid, form)
+	err = usecase.AccountUsecase{Ctx: ch.ctx}.UpdateUser(userid, form)
 	if err != nil {
 		return ch.errorResponse(c, http.StatusBadRequest, err)
 	}
@@ -111,7 +111,7 @@ func (ch AccountHandler) InActiveUser(c echo.Context) error {
 	log.Info(ch.ctx, c.Request().Method)
 	log.Info(ch.ctx, c.Request().Header)
 	userid, _ := strconv.Atoi(c.Param("id"))
-	err := usecase.AccountUsecase{}.InActiveUser(userid)
+	err := usecase.AccountUsecase{Ctx: ch.ctx}.InActiveUser(userid)
 	if err != nil {
 		return ch.errorResponse(c, http.StatusBadRequest, err)
 	}
@@ -138,7 +138,7 @@ func (ch AccountHandler) Login(c echo.Context) error {
 	if err != nil {
 		return ch.errorResponse(c, http.StatusBadRequest, err)
 	}
-	user, err := usecase.AccountUsecase{}.AuthUser(form)
+	user, err := usecase.AccountUsecase{Ctx: ch.ctx}.AuthUser(form)
 	if err != nil {
 		return ch.errorResponse(c, http.StatusBadRequest, err)
 	}

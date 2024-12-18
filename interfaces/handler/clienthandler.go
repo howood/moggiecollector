@@ -24,7 +24,7 @@ func (ch ClientHandler) GetProfile(c echo.Context) error {
 	log.Info(ch.ctx, c.Request().Method)
 	log.Info(ch.ctx, c.Request().Header)
 	claims := ch.getClaimsFromToken(c)
-	user, err := usecase.ClientUsecase{}.GetUserByToken(claims)
+	user, err := usecase.ClientUsecase{Ctx: ch.ctx}.GetUserByToken(claims)
 	if err != nil {
 		return ch.errorResponse(c, http.StatusBadRequest, err)
 	}
