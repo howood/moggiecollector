@@ -1,8 +1,6 @@
 package di
 
 import (
-	"context"
-
 	"github.com/howood/moggiecollector/domain/entity"
 	"github.com/howood/moggiecollector/domain/repository"
 	"github.com/howood/moggiecollector/infrastructure/client"
@@ -26,14 +24,13 @@ func init() {
 }
 
 func configureDatastore() (DataStore, error) {
-	ctx := context.Background()
 	configureddbstore := DataStore{}
-	dataaccessor := client.NewDatastorAssessor(ctx)
+	dataaccessor := client.NewDatastorAssessor()
 	tables := []interface{}{
 		&entity.User{},
 	}
 	dataaccessor.Instance.Migrate(tables)
-	configureddbstore.User = dao.NewUsersDao(ctx, dataaccessor.Instance)
+	configureddbstore.User = dao.NewUsersDao(dataaccessor.Instance)
 
 	return configureddbstore, nil
 }

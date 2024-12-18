@@ -5,62 +5,62 @@ import (
 
 	"github.com/howood/moggiecollector/application/actor"
 	"github.com/howood/moggiecollector/domain/entity"
+	"github.com/howood/moggiecollector/domain/repository"
 	"github.com/howood/moggiecollector/infrastructure/client/datastore"
 )
 
 // UsersDao struct
 type UsersDao struct {
 	instance datastore.DatastoreInstance
-	ctx      context.Context
 }
 
 // NewUsersDao creates a new UserRepository
-func NewUsersDao(ctx context.Context, instance datastore.DatastoreInstance) *UsersDao {
-	return &UsersDao{ctx: ctx, instance: instance}
+func NewUsersDao(instance datastore.DatastoreInstance) repository.UserRepository {
+	return &UsersDao{instance: instance}
 }
 
 // GetAll is get all
-func (u *UsersDao) GetAll() ([]entity.User, error) {
+func (u *UsersDao) GetAll(ctx context.Context) ([]entity.User, error) {
 	users := make([]entity.User, 0)
-	err := u.instance.GetClient().Where("status IN (?)", []entity.UserStatus{entity.UserStatusActive}).Order("user_id desc").Find(&users).Error
+	err := u.instance.GetClient().WithContext(ctx).Where("status IN (?)", []entity.UserStatus{entity.UserStatusActive}).Order("user_id desc").Find(&users).Error
 	return users, err
 }
 
 // GetAllWithInActive is get all
-func (u *UsersDao) GetAllWithInActive() ([]entity.User, error) {
+func (u *UsersDao) GetAllWithInActive(ctx context.Context) ([]entity.User, error) {
 	users := make([]entity.User, 0)
-	err := u.instance.GetClient().Where("status IN (?)", []entity.UserStatus{entity.UserStatusActive, entity.UserStatusInActive}).Order("user_id desc").Find(&users).Error
+	err := u.instance.GetClient().WithContext(ctx).Where("status IN (?)", []entity.UserStatus{entity.UserStatusActive, entity.UserStatusInActive}).Order("user_id desc").Find(&users).Error
 	return users, err
 }
 
 // Get is get by id
-func (u *UsersDao) Get(userID uint64) (entity.User, error) {
+func (u *UsersDao) Get(ctx context.Context, userID uint64) (entity.User, error) {
 	user := entity.User{}
-	err := u.instance.GetClient().Where("status = ? AND user_id = ?", entity.UserStatusActive, userID).First(&user).Error
+	err := u.instance.GetClient().WithContext(ctx).Where("status = ? AND user_id = ?", entity.UserStatusActive, userID).First(&user).Error
 	return user, err
 }
 
 // GetByIDAndEmail is get by id and email
-func (u *UsersDao) GetByIDAndEmail(userID uint64, email string) (entity.User, error) {
+func (u *UsersDao) GetByIDAndEmail(ctx context.Context, userID uint64, email string) (entity.User, error) {
 	user := entity.User{}
-	err := u.instance.GetClient().Where("status = ? AND user_id = ? AND email = ?", entity.UserStatusActive, userID, email).First(&user).Error
+	err := u.instance.GetClient().WithContext(ctx).Where("status = ? AND user_id = ? AND email = ?", entity.UserStatusActive, userID, email).First(&user).Error
 	return user, err
 }
 
 // GetByEmail is get by  email
-func (u *UsersDao) GetByEmail(email string) (entity.User, error) {
+func (u *UsersDao) GetByEmail(ctx context.Context, email string) (entity.User, error) {
 	user := entity.User{}
-	err := u.instance.GetClient().Where("status = ? AND email = ?", entity.UserStatusActive, email).First(&user).Error
+	err := u.instance.GetClient().WithContext(ctx).Where("status = ? AND email = ?", entity.UserStatusActive, email).First(&user).Error
 	return user, err
 }
 
 // Create is create new user
-func (u *UsersDao) Create(name, email, password string) error {
+func (u *UsersDao) Create(ctx context.Context, name, email, password string) error {
 	user, err := u.set(name, email, password)
 	if err != nil {
 		return err
 	}
-	tx := u.instance.GetClient().Begin()
+	tx := u.instance.GetClient().WithContext(ctx).Begin()
 	if err = tx.Create(&user).Error; err != nil {
 		tx.Rollback()
 		return err
@@ -70,12 +70,12 @@ func (u *UsersDao) Create(name, email, password string) error {
 }
 
 // Update is update exist user
-func (u *UsersDao) Update(userID uint64, name, email, password string) error {
+func (u *UsersDao) Update(ctx context.Context, userID uint64, name, email, password string) error {
 	user, err := u.set(name, email, password)
 	if err != nil {
 		return err
 	}
-	return u.instance.GetClient().Model(&entity.User{}).Where(
+	return u.instance.GetClient().WithContext(ctx).Model(&entity.User{}).Where(
 		"status = ? AND user_id = ?",
 		entity.UserStatusActive,
 		userID,
@@ -84,8 +84,8 @@ func (u *UsersDao) Update(userID uint64, name, email, password string) error {
 }
 
 // InActive is update exist user
-func (u *UsersDao) InActive(userID uint64) error {
-	return u.instance.GetClient().Model(&entity.User{}).Where(
+func (u *UsersDao) InActive(ctx context.Context, userID uint64) error {
+	return u.instance.GetClient().WithContext(ctx).Model(&entity.User{}).Where(
 		"status = ? AND user_id = ?",
 		entity.UserStatusActive,
 		userID,
@@ -94,9 +94,9 @@ func (u *UsersDao) InActive(userID uint64) error {
 }
 
 // Auth is authorize user
-func (u *UsersDao) Auth(email, password string) (entity.User, error) {
+func (u *UsersDao) Auth(ctx context.Context, email, password string) (entity.User, error) {
 	user := entity.User{}
-	if err := u.instance.GetClient().Where("status = ? AND email = ?", entity.UserStatusActive, email).First(&user).Error; err != nil {
+	if err := u.instance.GetClient().WithContext(ctx).Where("status = ? AND email = ?", entity.UserStatusActive, email).First(&user).Error; err != nil {
 		return entity.User{}, err
 	}
 	if err := u.comparePassword(user, password); err != nil {
