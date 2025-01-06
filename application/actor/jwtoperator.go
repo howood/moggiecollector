@@ -27,36 +27,37 @@ type JwtOperator struct {
 }
 
 // NewJwtOperator creates a new JwtClaimsRepository
-func NewJwtOperator(ctx context.Context, userId uint64, username string, admin bool, identifier string) *JwtOperator {
-	expired, _ := strconv.ParseInt(tokenExpired, 10, 64)
+func NewJwtOperator() *JwtOperator {
+
 	return &JwtOperator{
-		&jwtCreator{
-			jwtClaims: &entity.JwtClaims{
-				Name:       username,
-				UserID:     userId,
-				Admin:      admin,
-				Identifier: identifier,
-				RegisteredClaims: jwt.RegisteredClaims{
-					ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * time.Duration(expired))),
-				},
-			},
-			ctx: ctx,
-		},
+		&jwtCreator{},
 	}
 }
 
 // jwtCreator struct
 type jwtCreator struct {
-	jwtClaims *entity.JwtClaims
-	ctx       context.Context
 }
 
 // CreateToken creates a new token
-func (jc *jwtCreator) CreateToken() string {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jc.jwtClaims)
+func (jc *jwtCreator) CreateToken(ctx context.Context, userId uint64, username string, admin bool, identifier string) string {
+	expired, err := strconv.ParseInt(tokenExpired, 10, 64)
+	if err != nil {
+		log.Error(ctx, err.Error())
+		return ""
+	}
+	jwtClaims := &entity.JwtClaims{
+		Name:       username,
+		UserID:     userId,
+		Admin:      admin,
+		Identifier: identifier,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * time.Duration(expired))),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtClaims)
 	tokenstring, err := token.SignedString([]byte(TokenSecret))
 	if err != nil {
-		log.Error(jc.ctx, err.Error())
+		log.Error(ctx, err.Error())
 	}
 	return tokenstring
 }

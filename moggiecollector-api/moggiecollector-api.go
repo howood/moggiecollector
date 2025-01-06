@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/howood/moggiecollector/application/actor"
+	"github.com/howood/moggiecollector/di/dbcluster"
+	"github.com/howood/moggiecollector/di/uccluster"
 	"github.com/howood/moggiecollector/domain/entity"
 	"github.com/howood/moggiecollector/infrastructure/custommiddleware"
 	"github.com/howood/moggiecollector/interfaces/handler"
@@ -14,22 +14,26 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-// DefaultPort is default port of server
-var DefaultPort = utils.GetOsEnv("SERVER_PORT", "8080")
-
 func main() {
+
+	defaultPort := utils.GetOsEnv("SERVER_PORT", "8080")
+
+	dataStore := dbcluster.NewDatastore()
+	uccluster := uccluster.NewUsecaseCluster(dataStore)
+	baseHandler := handler.BaseHandler{UcCluster: uccluster}
+
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
 
-	e.GET("/users", handler.AccountHandler{}.GetUsers)
-	e.GET("/users/:id", handler.AccountHandler{}.GetUser)
-	e.POST("/users", handler.AccountHandler{}.CreateUser)
-	e.PUT("/users/:id", handler.AccountHandler{}.UpdateUser)
-	e.DELETE("/users/:id", handler.AccountHandler{}.InActiveUser)
+	e.GET("/users", handler.AccountHandler{BaseHandler: baseHandler}.GetUsers)
+	e.GET("/users/:id", handler.AccountHandler{BaseHandler: baseHandler}.GetUser)
+	e.POST("/users", handler.AccountHandler{BaseHandler: baseHandler}.CreateUser)
+	e.PUT("/users/:id", handler.AccountHandler{BaseHandler: baseHandler}.UpdateUser)
+	e.DELETE("/users/:id", handler.AccountHandler{BaseHandler: baseHandler}.InActiveUser)
 
-	e.POST("/login", handler.AccountHandler{}.Login)
+	e.POST("/login", handler.AccountHandler{BaseHandler: baseHandler}.Login)
 
 	jwtconfig := echojwt.Config{
 		Skipper: custommiddleware.OptionsMethodSkipper,
@@ -41,6 +45,6 @@ func main() {
 	}
 	e.GET("/profile", handler.ClientHandler{}.GetProfile, echojwt.WithConfig(jwtconfig))
 
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", DefaultPort)))
+	e.Logger.Fatal(e.Start(":" + defaultPort))
 
 }

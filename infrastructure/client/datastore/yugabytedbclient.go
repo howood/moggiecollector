@@ -1,7 +1,6 @@
 package datastore
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -75,9 +74,4 @@ func (yc *YugaByteDbClient) Migrate(tables []interface{}) {
 		yc.Client.AutoMigrate(tabele)
 	}
 
-}
-
-// RecordNotFoundError is check error as record not found
-func (yc *YugaByteDbClient) RecordNotFoundError(err error) bool {
-	return errors.Is(err, gorm.ErrRecordNotFound)
 }

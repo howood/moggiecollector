@@ -1,7 +1,6 @@
 package validator
 
 import (
-	"context"
 	"errors"
 	"strings"
 
@@ -16,18 +15,16 @@ import (
 type Validator struct {
 	validate *val.Validate
 	trans    ut.Translator
-	ctx      context.Context
 }
 
 // NewValidator creates a new Validator
-func NewValidator(ctx context.Context) *Validator {
+func NewValidator() *Validator {
 	en := en.New()
 	uni := ut.New(en, en)
 	trans, _ := uni.GetTranslator(utils.GetOsEnv("VALIDATE_LANG", "en"))
 	I := &Validator{
 		validate: val.New(),
 		trans:    trans,
-		ctx:      ctx,
 	}
 	en_translations.RegisterDefaultTranslations(I.validate, I.trans)
 	return I

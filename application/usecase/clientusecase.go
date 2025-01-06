@@ -3,14 +3,21 @@ package usecase
 import (
 	"context"
 
-	"github.com/howood/moggiecollector/di"
+	"github.com/howood/moggiecollector/di/dbcluster"
 	"github.com/howood/moggiecollector/domain/entity"
+	"github.com/howood/moggiecollector/domain/model"
 )
 
 type ClientUsecase struct {
-	Ctx context.Context
+	DataStore dbcluster.DataStore
 }
 
-func (au ClientUsecase) GetUserByToken(claims *entity.JwtClaims) (entity.User, error) {
-	return di.GetDataStore().User.GetByIDAndEmail(au.Ctx, claims.UserID, claims.Name)
+func NewClientUsecase(dataStore dbcluster.DataStore) *ClientUsecase {
+	return &ClientUsecase{
+		DataStore: dataStore,
+	}
+}
+
+func (cu *ClientUsecase) GetUserByToken(ctx context.Context, claims *entity.JwtClaims) (model.User, error) {
+	return cu.DataStore.DSRepository().UserRepository.GetByIDAndEmail(cu.DataStore.DBInstanceClient(ctx), claims.UserID, claims.Name)
 }
