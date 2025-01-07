@@ -6,7 +6,8 @@ import (
 
 	"github.com/howood/moggiecollector/application/actor"
 	"github.com/howood/moggiecollector/di/dbcluster"
-	"github.com/howood/moggiecollector/domain/form"
+	"github.com/howood/moggiecollector/domain/dto"
+	"github.com/howood/moggiecollector/domain/entity"
 	"github.com/howood/moggiecollector/domain/model"
 	"gorm.io/gorm"
 )
@@ -21,25 +22,31 @@ func NewAccountUsecase(dataStore dbcluster.DataStore) *AccountUsecase {
 	}
 }
 
-func (au *AccountUsecase) GetUsers(ctx context.Context, withinactive string) ([]model.User, error) {
+func (au *AccountUsecase) GetUsers(ctx context.Context, withinactive string) ([]*entity.User, error) {
 	if withinactive == "true" {
-		return au.DataStore.DSRepository().UserRepository.GetAllWithInActive(au.DataStore.DBInstanceClient(ctx))
+		users, err := au.DataStore.DSRepository().UserRepository.GetAllWithInActive(au.DataStore.DBInstanceClient(ctx))
+		return au.convertToEntityUsers(users), err
 	}
-	return au.DataStore.DSRepository().UserRepository.GetAll(au.DataStore.DBInstanceClient(ctx))
+	users, err := au.DataStore.DSRepository().UserRepository.GetAll(au.DataStore.DBInstanceClient(ctx))
+	return au.convertToEntityUsers(users), err
 }
 
-func (au *AccountUsecase) GetUser(ctx context.Context, userid int) (model.User, error) {
+func (au *AccountUsecase) GetUser(ctx context.Context, userid int) (*entity.User, error) {
 	//nolint:gosec
-	return au.DataStore.DSRepository().UserRepository.Get(au.DataStore.DBInstanceClient(ctx), uint64(userid))
+	user, err := au.DataStore.DSRepository().UserRepository.Get(au.DataStore.DBInstanceClient(ctx), uint64(userid))
+	if err != nil {
+		return &entity.User{}, err
+	}
+	return entity.NewUser(&user), nil
 }
 
-func (au *AccountUsecase) CreateUser(ctx context.Context, form form.CreateUserForm) error {
-	user, err := au.createUser(ctx, form)
+func (au *AccountUsecase) CreateUser(ctx context.Context, userDto *dto.UserDto) error {
+	user, err := au.createUser(ctx, userDto)
 	if err != nil {
 		return err
 	}
 	return au.DataStore.DBInstanceClient(ctx).Transaction(func(tx *gorm.DB) error {
-		if _, err := au.DataStore.DSRepository().UserRepository.GetByEmail(tx, form.Email); err != nil && !au.DataStore.RecordNotFoundError(err) {
+		if _, err := au.DataStore.DSRepository().UserRepository.GetByEmail(tx, userDto.Email); err != nil && !au.DataStore.RecordNotFoundError(err) {
 			return err
 		}
 		if err == nil {
@@ -50,8 +57,8 @@ func (au *AccountUsecase) CreateUser(ctx context.Context, form form.CreateUserFo
 	})
 }
 
-func (au *AccountUsecase) UpdateUser(ctx context.Context, userid int, form form.CreateUserForm) error {
-	user, err := au.createUser(ctx, form)
+func (au *AccountUsecase) UpdateUser(ctx context.Context, userid int, userDto *dto.UserDto) error {
+	user, err := au.createUser(ctx, userDto)
 	if err != nil {
 		return err
 	}
@@ -69,15 +76,15 @@ func (au *AccountUsecase) InActiveUser(ctx context.Context, userid int) error {
 	})
 }
 
-func (au *AccountUsecase) AuthUser(ctx context.Context, form form.LoginUserForm) (model.User, error) {
-	user, err := au.DataStore.DSRepository().UserRepository.GetByEmail(au.DataStore.DBInstanceClient(ctx), form.Email)
+func (au *AccountUsecase) AuthUser(ctx context.Context, loginDto *dto.LoginDto) (*entity.User, error) {
+	user, err := au.DataStore.DSRepository().UserRepository.GetByEmail(au.DataStore.DBInstanceClient(ctx), loginDto.Email)
 	if err != nil {
-		return model.User{}, err
+		return &entity.User{}, err
 	}
-	if err := au.comparePassword(user, form.Password); err != nil {
-		return model.User{}, err
+	if err := au.comparePassword(user, loginDto.Password); err != nil {
+		return &entity.User{}, err
 	}
-	return user, nil
+	return entity.NewUser(&user), nil
 }
 
 // ComparePassword compares input password to roomdata password
@@ -85,15 +92,30 @@ func (au *AccountUsecase) comparePassword(user model.User, password string) erro
 	return actor.PasswordOperator{}.ComparePassword(user.Password, password, user.Salt)
 }
 
-func (au *AccountUsecase) createUser(ctx context.Context, form form.CreateUserForm) (model.User, error) {
-	hashedpassword, salt, err := actor.PasswordOperator{}.GetHashedPassword(ctx, form.Password)
+func (au *AccountUsecase) createUser(ctx context.Context, userDto *dto.UserDto) (model.User, error) {
+	hashedpassword, salt, err := actor.PasswordOperator{}.GetHashedPassword(ctx, userDto.Password)
 	if err != nil {
 		return model.User{}, err
 	}
 	return model.User{
-		Name:     form.Name,
-		Email:    form.Email,
+		Name:     userDto.Name,
+		Email:    userDto.Email,
 		Password: hashedpassword,
 		Salt:     salt,
 	}, nil
+}
+
+func (au *AccountUsecase) convertToEntityUsers(users []model.User) []*entity.User {
+	entityUsers := make([]*entity.User, 0)
+
+	for _, user := range users {
+		entityUsers = append(entityUsers, &entity.User{
+			UserID: user.UserID,
+			Name:   user.Name,
+			Email:  user.Email,
+			Status: user.Status,
+		})
+	}
+
+	return entityUsers
 }
