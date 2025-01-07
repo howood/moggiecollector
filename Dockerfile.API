@@ -1,8 +1,9 @@
-FROM golang:1.21 AS build-env
+FROM golang:1.23 AS build-env
 
 WORKDIR /go/src/github.com/howood/mogiecollector
 
 ADD application /go/src/github.com/howood/mogiecollector/application
+ADD di /go/src/github.com/howood/mogiecollector/di
 ADD domain /go/src/github.com/howood/mogiecollector/domain
 ADD mogiecollector-api /go/src/github.com/howood/mogiecollector/mogiecollector-api
 ADD infrastructure /go/src/github.com/howood/mogiecollector/infrastructure
