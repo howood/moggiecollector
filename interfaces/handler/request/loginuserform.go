@@ -1,4 +1,4 @@
-package form
+package request
 
 // LoginUserForm entity
 type LoginUserForm struct {
