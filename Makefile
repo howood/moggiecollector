@@ -18,3 +18,12 @@ test:
 testv:
 	export GO111MODULE=on && go test ./... -v
 
+lint:
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.62.2 &&  \
+	./bin/golangci-lint run ./...
+
+fmt:
+	go install golang.org/x/tools/cmd/goimports@v0.28.0
+	go install mvdan.cc/gofumpt@v0.7.0
+	goimports -w .
+	gofumpt -w .

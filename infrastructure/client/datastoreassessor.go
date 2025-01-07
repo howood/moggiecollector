@@ -18,11 +18,11 @@ func NewDatastorAssessor() *DatastorAssessor {
 	switch utils.GetOsEnv("DATASTORE_TYPE", "yogabytedb") {
 	case "yogabytedb":
 		I = &DatastorAssessor{
-			Instance: datastore.NewYugaByteDbClient(),
+			Instance: datastore.NewYugaByteDBClient(),
 		}
 	default:
 		I = &DatastorAssessor{
-			Instance: datastore.NewYugaByteDbClient(),
+			Instance: datastore.NewYugaByteDBClient(),
 		}
 	}
 	return I

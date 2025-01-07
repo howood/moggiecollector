@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net"
 	"os"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -11,64 +12,78 @@ import (
 	"github.com/howood/moggiecollector/library/utils"
 )
 
-//sql and database info
+// sql and database info.
 const (
-	Source = "file://./database/migrations/"
+	Source        = "file://./database/migrations/"
+	dbPort string = "5432"
 )
 
+//nolint:gochecknoglobals
 var (
-	Command  = flag.String("cmd", "", "up or down")
-	Force    = flag.Bool("f", false, "force execute sql")
-	Database = fmt.Sprintf(
-		"postgres://%s:%s@%s:%d/%s?sslmode=disable",
-		os.Getenv("YUGABYTEDB_USER"),
-		os.Getenv("YUGABYTEDB_PASSWORD"),
-		os.Getenv("YUGABYTEDB_HOSTNAME"),
-		utils.GetOsEnvInt("YUGABYTEDB_PORT", 5433),
-		os.Getenv("YUGABYTEDB_DBNAME"),
-	)
+	command = flag.String("cmd", "", "up or down")
+	force   = flag.Bool("f", false, "force execute sql")
 )
 
+//nolint:forbidigo
 func main() {
-
 	flag.Parse()
-	if len(*Command) < 1 {
+
+	if len(*command) < 1 {
 		fmt.Println("")
 		fmt.Println("Error : no argument")
 		fmt.Println("")
 		os.Exit(1)
+
 		return
 	}
 
-	m, err := migrate.New(Source, Database)
+	addr := net.JoinHostPort(os.Getenv("DB_HOSTNAME"), utils.GetOsEnv("DB_PORT", dbPort))
+	database := fmt.Sprintf(
+		"postgres://%s:%s@%s/%s?sslmode=disable",
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		addr,
+		os.Getenv("DB_DBNAME"),
+	)
+
+	fmt.Println("DSN:", database)
+
+	m, err := migrate.New(Source, database)
 	if err != nil {
 		fmt.Println("err", err)
 	}
+
 	version, dirty, err := m.Version()
 	showVersion(version, dirty, err, "current")
 
-	fmt.Println("command: cmd", *Command)
+	fmt.Println("command: cmd", *command)
 	apply(m, version, dirty)
 }
 
+//nolint:forbidigo
 func apply(m *migrate.Migrate, version uint, dirty bool) {
-	if dirty && *Force {
+	if dirty && *force {
 		fmt.Println("force=true: force execute current version sql")
-		m.Force(int(version))
+		//nolint:gosec
+		if err := m.Force(int(version)); err != nil {
+			fmt.Println("err", err)
+			os.Exit(1)
+		}
 	}
 
 	var err error
-	switch *Command {
+
+	switch *command {
 	case "up":
 		err = m.Up()
 	case "down":
 		err = m.Down()
 	case "version":
-		//do nothing
+		// do nothing
 		return
 	default:
 		fmt.Println("")
-		fmt.Println("Error : invalid command > ", *Command)
+		fmt.Println("Error : invalid command > ", *command)
 		fmt.Println("")
 		os.Exit(1)
 	}
@@ -76,13 +91,17 @@ func apply(m *migrate.Migrate, version uint, dirty bool) {
 	if err != nil {
 		fmt.Println("err", err)
 		os.Exit(1)
-	} else {
-		fmt.Println("success:", *Command)
-		version, dirty, err := m.Version()
-		showVersion(version, dirty, err, "updated")
+
+		return
 	}
+
+	fmt.Println("success:", *command)
+
+	version, dirty, err = m.Version()
+	showVersion(version, dirty, err, "updated")
 }
 
+//nolint:forbidigo
 func showVersion(version uint, dirty bool, err error, msg string) {
 	fmt.Println("____/:::", msg, ":::\\_______")
 	fmt.Println("version :", version)

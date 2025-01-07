@@ -1,10 +1,13 @@
 package actor
 
 import (
+	"context"
+
 	"github.com/howood/moggiecollector/infrastructure/encrypt"
 	"github.com/howood/moggiecollector/library/utils"
 )
 
+//nolint:gochecknoglobals,mnd
 var (
 	usetype      = utils.GetOsEnv("PASSOWRD_USETYPE", "scrypt")
 	scryptN      = utils.GetOsEnvInt("PASSOWRD_SCRYPTN", 32768)
@@ -13,12 +16,11 @@ var (
 	scryptkeyLen = utils.GetOsEnvInt("PASSOWRD_SCRYPTKEYLEN", 32)
 )
 
-//PasswordOperator struct
-type PasswordOperator struct {
-}
+// PasswordOperator struct
+type PasswordOperator struct{}
 
-//GetHashedPassword get hashed password
-func (po PasswordOperator) GetHashedPassword(password string) (string, string, error) {
+// GetHashedPassword get hashed password
+func (po PasswordOperator) GetHashedPassword(ctx context.Context, password string) (string, string, error) {
 	passwordhash := encrypt.PasswordHash{
 		Type:         usetype,
 		ScryptN:      scryptN,
@@ -26,10 +28,10 @@ func (po PasswordOperator) GetHashedPassword(password string) (string, string, e
 		ScryptP:      scryptP,
 		ScryptKeylen: scryptkeyLen,
 	}
-	return passwordhash.GetHashed(password)
+	return passwordhash.GetHashed(ctx, password)
 }
 
-//ComparePassword compare hashed password and string password
+// ComparePassword compare hashed password and string password
 func (po PasswordOperator) ComparePassword(hashedpassword, password, salt string) error {
 	passwordhash := encrypt.PasswordHash{
 		Type:         usetype,

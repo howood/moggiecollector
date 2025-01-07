@@ -1,21 +1,18 @@
 package repository
 
 import (
-	"context"
-
-	"github.com/howood/moggiecollector/domain/entity"
+	"github.com/howood/moggiecollector/domain/model"
+	"gorm.io/gorm"
 )
 
 // UserRepository interface
 type UserRepository interface {
-	GetAll(ctx context.Context) ([]entity.User, error)
-	GetAllWithInActive(ctx context.Context) ([]entity.User, error)
-	Get(ctx context.Context, userID uint64) (entity.User, error)
-	GetByIDAndEmail(ctx context.Context, userID uint64, email string) (entity.User, error)
-	GetByEmail(ctx context.Context, email string) (entity.User, error)
-	Create(ctx context.Context, name, email, password string) error
-	Update(ctx context.Context, userID uint64, name, email, password string) error
-	InActive(ctx context.Context, userID uint64) error
-	Auth(ctx context.Context, email, password string) (entity.User, error)
-	RecordNotFoundError(err error) bool
+	GetAll(db *gorm.DB) ([]model.User, error)
+	GetAllWithInActive(db *gorm.DB) ([]model.User, error)
+	Get(db *gorm.DB, userID uint64) (model.User, error)
+	GetByIDAndEmail(db *gorm.DB, userID uint64, email string) (model.User, error)
+	GetByEmail(db *gorm.DB, email string) (model.User, error)
+	Create(db *gorm.DB, user *model.User) error
+	Update(db *gorm.DB, user *model.User) error
+	InActive(db *gorm.DB, userID uint64) error
 }

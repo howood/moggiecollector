@@ -1,13 +1,14 @@
 package encrypt
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"io"
 
+	log "github.com/howood/moggiecollector/infrastructure/logger"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/scrypt"
 )
@@ -15,16 +16,16 @@ import (
 // SaltBufLen is Salt buffer length
 const SaltBufLen = 14
 
-//HashtypeScrypt is Hashtype scrypt
+// HashtypeScrypt is Hashtype scrypt
 const HashtypeScrypt = "scrypt"
 
-//HashtypeBcrypt is Hashtype bcrypt
+// HashtypeBcrypt is Hashtype bcrypt
 const HashtypeBcrypt = "bcrypt"
 
-//WrongPasswordMessage is error message
-const WrongPasswordMessage = "Wrong Password"
+// WrongPasswordMessage is error message
+const WrongPasswordMessage = "wrong Password"
 
-//PasswordHash struct
+// PasswordHash struct
 type PasswordHash struct {
 	Type         string
 	ScryptN      int
@@ -33,12 +34,12 @@ type PasswordHash struct {
 	ScryptKeylen int
 }
 
-func (ph PasswordHash) getSalt() string {
+func (ph PasswordHash) getSalt(ctx context.Context) string {
 	b := make([]byte, SaltBufLen)
 
 	_, err := io.ReadFull(rand.Reader, b)
 	if err != nil {
-		fmt.Println("error:", err)
+		log.Error(ctx, err.Error())
 	}
 
 	salt := base64.StdEncoding.EncodeToString(b)
@@ -51,6 +52,7 @@ func (ph PasswordHash) hashWithScrypt(password, saltstr string) (string, error) 
 	if err != nil {
 		return "", err
 	}
+	//nolint:gocritic
 	return hex.EncodeToString(converted[:]), nil
 }
 
@@ -60,6 +62,7 @@ func (ph PasswordHash) comparePasswordWithScrypt(hashedpassword, password, salts
 		return err
 	}
 	if hashedpassword != hashed {
+		//nolint:err113
 		return errors.New(WrongPasswordMessage)
 	}
 	return nil
@@ -70,6 +73,7 @@ func (ph PasswordHash) hashWithBcrypt(password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	//nolint:gocritic
 	return hex.EncodeToString(converted[:]), nil
 }
 
@@ -78,10 +82,10 @@ func (ph PasswordHash) comparePasswordWithBcrypt(hashedpassword, password string
 }
 
 // GetHashed get hashed password and salt
-func (ph PasswordHash) GetHashed(password string) (string, string, error) {
+func (ph PasswordHash) GetHashed(ctx context.Context, password string) (string, string, error) {
 	switch ph.Type {
 	case HashtypeScrypt:
-		saltstr := ph.getSalt()
+		saltstr := ph.getSalt(ctx)
 		hashedpasswd, err := ph.hashWithScrypt(password, saltstr)
 		return hashedpasswd, saltstr, err
 	case HashtypeBcrypt:
