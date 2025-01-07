@@ -134,7 +134,7 @@ func (ch AccountHandler) Login(c echo.Context) error {
 		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
 	if err == nil {
-		token, err = ch.createToken(ctx, user.UserID, user.Email)
+		token = ch.createToken(ctx, user.UserID, user.Email)
 	}
 	return c.JSONPretty(http.StatusOK, map[string]interface{}{"token": token}, marshalIndent)
 }

@@ -13,7 +13,6 @@ import (
 // CacheAssessor struct
 type CacheAssessor struct {
 	instance caches.CacheInstance
-	ctx      context.Context
 }
 
 // NewCacheAssessor creates a new CacheAssessor
@@ -23,13 +22,11 @@ func NewCacheAssessor(ctx context.Context) *CacheAssessor {
 	switch utils.GetOsEnv("CACHE_TYPE", "gocache") {
 	case "gocache":
 		I = &CacheAssessor{
-			instance: caches.NewGoCacheClient(ctx),
-			ctx:      ctx,
+			instance: caches.NewGoCacheClient(),
 		}
 	default:
 		I = &CacheAssessor{
-			instance: caches.NewGoCacheClient(ctx),
-			ctx:      ctx,
+			instance: caches.NewGoCacheClient(),
 		}
 	}
 	return I
@@ -37,7 +34,10 @@ func NewCacheAssessor(ctx context.Context) *CacheAssessor {
 
 // Get returns cache contents
 func (ca *CacheAssessor) Get(index string) (interface{}, bool) {
-	defer ca.instance.CloseConnect()
+	defer func() {
+		//nolint:errcheck
+		ca.instance.CloseConnect()
+	}()
 	cachedvalue, cachedfound := ca.instance.Get(index)
 	if cachedfound {
 		return cachedvalue, true
@@ -47,13 +47,20 @@ func (ca *CacheAssessor) Get(index string) (interface{}, bool) {
 
 // Set puts cache contents
 func (ca *CacheAssessor) Set(index string, value interface{}, expired time.Duration) error {
-	defer ca.instance.CloseConnect()
+	defer func() {
+		//nolint:errcheck
+		ca.instance.CloseConnect()
+	}()
+	//nolint:durationcheck
 	return ca.instance.Set(index, value, expired*time.Second)
 }
 
 // Delete remove cache contents
 func (ca *CacheAssessor) Delete(index string) error {
-	defer ca.instance.CloseConnect()
+	defer func() {
+		//nolint:errcheck
+		ca.instance.CloseConnect()
+	}()
 	return ca.instance.Del(index)
 }
 

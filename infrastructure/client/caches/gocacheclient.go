@@ -16,23 +16,24 @@ const (
 	PurgeExpiredTime = 10
 )
 
+//nolint:gochecknoglobals
 var gocacheConnectionMap map[int]*cache.Cache
 
+//nolint:gochecknoinits
 func init() {
 	gocacheConnectionMap = make(map[int]*cache.Cache, 0)
-	for i := 0; i < NumInstance; i++ {
+	for i := range NumInstance {
+		//nolint:mnd
 		gocacheConnectionMap[i] = cache.New(60*time.Minute, PurgeExpiredTime*time.Minute)
 	}
 }
 
 // GoCacheClient struct
-type GoCacheClient struct {
-	ctx context.Context
-}
+type GoCacheClient struct{}
 
 // NewGoCacheClient creates a new GoCacheClient
-func NewGoCacheClient(ctx context.Context) *GoCacheClient {
-	ret := &GoCacheClient{ctx: ctx}
+func NewGoCacheClient() *GoCacheClient {
+	ret := &GoCacheClient{}
 	return ret
 }
 
@@ -66,11 +67,13 @@ func (cc *GoCacheClient) CloseConnect() error {
 
 func (cc *GoCacheClient) getInstance(key string) *cache.Cache {
 	// djb2 algorithm
-	i, hash := 0, uint32(5381)
+	//nolint:mnd
+	hash := uint32(5381)
 	for _, c := range key {
+		//nolint:mnd
 		hash = ((hash << 5) + hash) + uint32(c)
 	}
-	i = int(hash) % NumInstance
-	log.Info(cc.ctx, fmt.Sprintf("get_instance: %d", i))
+	i := int(hash) % NumInstance
+	log.Info(context.Background(), fmt.Sprintf("get_instance: %d", i))
 	return gocacheConnectionMap[i]
 }

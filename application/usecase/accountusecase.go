@@ -24,17 +24,17 @@ func NewAccountUsecase(dataStore dbcluster.DataStore) *AccountUsecase {
 func (au *AccountUsecase) GetUsers(ctx context.Context, withinactive string) ([]model.User, error) {
 	if withinactive == "true" {
 		return au.DataStore.DSRepository().UserRepository.GetAllWithInActive(au.DataStore.DBInstanceClient(ctx))
-	} else {
-		return au.DataStore.DSRepository().UserRepository.GetAll(au.DataStore.DBInstanceClient(ctx))
 	}
+	return au.DataStore.DSRepository().UserRepository.GetAll(au.DataStore.DBInstanceClient(ctx))
 }
 
 func (au *AccountUsecase) GetUser(ctx context.Context, userid int) (model.User, error) {
+	//nolint:gosec
 	return au.DataStore.DSRepository().UserRepository.Get(au.DataStore.DBInstanceClient(ctx), uint64(userid))
 }
 
 func (au *AccountUsecase) CreateUser(ctx context.Context, form form.CreateUserForm) error {
-	user, err := au.createUser(form.Name, form.Email, form.Password)
+	user, err := au.createUser(ctx, form)
 	if err != nil {
 		return err
 	}
@@ -43,6 +43,7 @@ func (au *AccountUsecase) CreateUser(ctx context.Context, form form.CreateUserFo
 			return err
 		}
 		if err == nil {
+			//nolint:err113
 			return errors.New("exist user with requested email")
 		}
 		return au.DataStore.DSRepository().UserRepository.Create(tx, &user)
@@ -50,10 +51,11 @@ func (au *AccountUsecase) CreateUser(ctx context.Context, form form.CreateUserFo
 }
 
 func (au *AccountUsecase) UpdateUser(ctx context.Context, userid int, form form.CreateUserForm) error {
-	user, err := au.createUser(form.Name, form.Email, form.Password)
+	user, err := au.createUser(ctx, form)
 	if err != nil {
 		return err
 	}
+	//nolint:gosec
 	user.UserID = uint64(userid)
 	return au.DataStore.DBInstanceClient(ctx).Transaction(func(tx *gorm.DB) error {
 		return au.DataStore.DSRepository().UserRepository.Update(tx, &user)
@@ -62,6 +64,7 @@ func (au *AccountUsecase) UpdateUser(ctx context.Context, userid int, form form.
 
 func (au *AccountUsecase) InActiveUser(ctx context.Context, userid int) error {
 	return au.DataStore.DBInstanceClient(ctx).Transaction(func(tx *gorm.DB) error {
+		//nolint:gosec
 		return au.DataStore.DSRepository().UserRepository.InActive(tx, uint64(userid))
 	})
 }
@@ -82,14 +85,14 @@ func (au *AccountUsecase) comparePassword(user model.User, password string) erro
 	return actor.PasswordOperator{}.ComparePassword(user.Password, password, user.Salt)
 }
 
-func (au *AccountUsecase) createUser(name, email, password string) (model.User, error) {
-	hashedpassword, salt, err := actor.PasswordOperator{}.GetHashedPassword(password)
+func (au *AccountUsecase) createUser(ctx context.Context, form form.CreateUserForm) (model.User, error) {
+	hashedpassword, salt, err := actor.PasswordOperator{}.GetHashedPassword(ctx, form.Password)
 	if err != nil {
 		return model.User{}, err
 	}
 	return model.User{
-		Name:     name,
-		Email:    email,
+		Name:     form.Name,
+		Email:    form.Email,
 		Password: hashedpassword,
 		Salt:     salt,
 	}, nil

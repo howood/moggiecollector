@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
+//nolint:gochecknoglobals
 var RecordNotFoundMsg = client.RecordNotFoundMsg
 
 // DataStore interface.

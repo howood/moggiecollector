@@ -15,17 +15,17 @@ const (
 	templateThirdCheckDir  = "/go/templates/"
 )
 
-//HTMLTemplate is HTMLTemplate struct
+// HTMLTemplate is HTMLTemplate struct
 type HTMLTemplate struct {
 	Templates *template.Template
 }
 
-//Render is render html
-func (t *HTMLTemplate) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+// Render is render html
+func (t *HTMLTemplate) Render(w io.Writer, name string, data interface{}, _ echo.Context) error {
 	return t.Templates.ExecuteTemplate(w, name, data)
 }
 
-//LoadTemplate load html directories
+// LoadTemplate load html directories
 func LoadTemplate(pattern string) (*template.Template, error) {
 	var template *template.Template
 	var err error

@@ -1,37 +1,42 @@
-package requestid
+package requestid_test
 
 import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/howood/moggiecollector/infrastructure/requestid"
 	"github.com/labstack/echo/v4"
 )
 
 func Test_RequestIDHandler(t *testing.T) {
+	t.Parallel()
+
 	checkvalue := "azxswedcvfr"
-	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/", nil)
 	req.Header.Set("X-Request-ID", checkvalue)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	xrequestid := GetRequestID(c.Request())
-	if xrequestid != checkvalue {
+	e := echo.New()
+	c := e.NewContext(req, httptest.NewRecorder())
+
+	if xrequestid := requestid.GetRequestID(c.Request()); xrequestid != checkvalue {
 		t.Fatal("failed test RequestIDHandler")
 	}
+
 	t.Log("success RequestIDHandler")
 }
 
 func Test_RequestIDHandlerCreateNew(t *testing.T) {
-	e := echo.New()
+	t.Parallel()
+
 	req := httptest.NewRequest(http.MethodPost, "/", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	xrequestid := GetRequestID(c.Request())
-	if xrequestid == "" {
+	e := echo.New()
+	c := e.NewContext(req, httptest.NewRecorder())
+
+	if xrequestid := requestid.GetRequestID(c.Request()); xrequestid == "" {
 		t.Fatal("failed test RequestIDHandler Create New")
 	}
+
 	t.Log("success RequestIDHandler Create New")
 }

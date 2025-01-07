@@ -13,9 +13,13 @@ import (
 )
 
 // tokenExpired is token's expired
+//
+//nolint:gochecknoglobals
 var tokenExpired = utils.GetOsEnv("TOKEN_EXPIED", "3600")
 
 // TokenSecret define token secrets
+//
+//nolint:gochecknoglobals
 var TokenSecret = utils.GetOsEnv("TOKEN_SECRET", "secretsecretdsfdsfsdfdsfsdf")
 
 // JWTContextKey is context key name
@@ -28,18 +32,16 @@ type JwtOperator struct {
 
 // NewJwtOperator creates a new JwtClaimsRepository
 func NewJwtOperator() *JwtOperator {
-
 	return &JwtOperator{
 		&jwtCreator{},
 	}
 }
 
 // jwtCreator struct
-type jwtCreator struct {
-}
+type jwtCreator struct{}
 
 // CreateToken creates a new token
-func (jc *jwtCreator) CreateToken(ctx context.Context, userId uint64, username string, admin bool, identifier string) string {
+func (jc *jwtCreator) CreateToken(ctx context.Context, userID uint64, username string, admin bool, identifier string) string {
 	expired, err := strconv.ParseInt(tokenExpired, 10, 64)
 	if err != nil {
 		log.Error(ctx, err.Error())
@@ -47,7 +49,7 @@ func (jc *jwtCreator) CreateToken(ctx context.Context, userId uint64, username s
 	}
 	jwtClaims := &entity.JwtClaims{
 		Name:       username,
-		UserID:     userId,
+		UserID:     userID,
 		Admin:      admin,
 		Identifier: identifier,
 		RegisteredClaims: jwt.RegisteredClaims{

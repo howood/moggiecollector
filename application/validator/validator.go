@@ -26,9 +26,10 @@ func NewValidator() *Validator {
 		validate: val.New(),
 		trans:    trans,
 	}
-	en_translations.RegisterDefaultTranslations(I.validate, I.trans)
+	if err := en_translations.RegisterDefaultTranslations(I.validate, I.trans); err != nil {
+		panic(err)
+	}
 	return I
-
 }
 
 // Validate process to validate
@@ -36,10 +37,12 @@ func (v *Validator) Validate(structData interface{}) error {
 	err := v.validate.Struct(structData)
 	if err != nil {
 		errmsg := []string{}
+		//nolint:errorlint,forcetypeassert
 		errs := err.(val.ValidationErrors)
 		for _, e := range errs {
 			errmsg = append(errmsg, e.Translate(v.trans))
 		}
+		//nolint:err113
 		return errors.New(strings.Join(errmsg, " / "))
 	}
 	return nil

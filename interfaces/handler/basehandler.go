@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -22,18 +23,14 @@ type BaseHandler struct {
 	UcCluster *uccluster.UsecaseCluster
 }
 
+//nolint:unparam
 func (bh BaseHandler) errorResponse(ctx context.Context, c echo.Context, statudcode int, err error) error {
 	if strings.Contains(strings.ToLower(err.Error()), dbcluster.RecordNotFoundMsg) {
 		statudcode = http.StatusNotFound
 	}
-	c.Response().Header().Set(echo.HeaderXRequestID, ctx.Value(echo.HeaderXRequestID).(string))
-	return c.JSONPretty(statudcode, map[string]interface{}{"message": err.Error()}, "    ")
-}
 
-func (bh BaseHandler) setResponseHeader(c echo.Context, lastmodified, contentlength, xrequestud string) {
-	c.Response().Header().Set(echo.HeaderLastModified, lastmodified)
-	c.Response().Header().Set(echo.HeaderContentLength, contentlength)
-	c.Response().Header().Set(echo.HeaderXRequestID, xrequestud)
+	c.Response().Header().Set(echo.HeaderXRequestID, fmt.Sprintf("%v", ctx.Value(echo.HeaderXRequestID)))
+	return c.JSONPretty(statudcode, map[string]interface{}{"message": err.Error()}, "    ")
 }
 
 func (bh BaseHandler) validate(stc interface{}) error {
@@ -41,15 +38,16 @@ func (bh BaseHandler) validate(stc interface{}) error {
 	return val.Validate(stc)
 }
 
+//nolint:forcetypeassert
 func (bh BaseHandler) getClaimsFromToken(c echo.Context) *entity.JwtClaims {
 	user := c.Get(actor.JWTContextKey).(*jwt.Token)
 	claims := user.Claims.(*entity.JwtClaims)
 	return claims
 }
 
-func (bh BaseHandler) createToken(ctx context.Context, userId uint64, username string) (string, error) {
-	tokenstr := actor.NewJwtOperator().CreateToken(ctx, userId, username, false, "moggiecollector-api")
-	return tokenstr, nil
+func (bh BaseHandler) createToken(ctx context.Context, userID uint64, username string) string {
+	tokenstr := actor.NewJwtOperator().CreateToken(ctx, userID, username, false, "moggiecollector-api")
+	return tokenstr
 }
 
 func (bh BaseHandler) initalGenerateContext(c echo.Context) context.Context {

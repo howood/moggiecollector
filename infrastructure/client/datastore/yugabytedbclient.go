@@ -6,24 +6,24 @@ import (
 	"os"
 	"time"
 
+	"github.com/howood/moggiecollector/library/utils"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-
-	"github.com/howood/moggiecollector/library/utils"
 )
 
-// YugaByteDbClient is YugaByteDb Client
-type YugaByteDbClient struct {
+// YugaByteDBClient is YugaByteDb Client
+type YugaByteDBClient struct {
 	Client *gorm.DB
 }
 
-// NewYugaByteDbClient creates a new YugaByteDbClient
-func NewYugaByteDbClient() *YugaByteDbClient {
-	ret := &YugaByteDbClient{Client: generateConnection()}
+// NewYugaByteDBClient creates a new YugaByteDBClient
+func NewYugaByteDBClient() *YugaByteDBClient {
+	ret := &YugaByteDBClient{Client: generateConnection()}
 	return ret
 }
 
+//nolint:mnd
 func generateConnection() *gorm.DB {
 	var err error
 	dbURI := fmt.Sprintf(
@@ -47,6 +47,7 @@ func generateConnection() *gorm.DB {
 	return dbInstance
 }
 
+//nolint:ireturn
 func gormConfig() gorm.Option {
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
@@ -64,14 +65,15 @@ func gormConfig() gorm.Option {
 	}
 }
 
-func (yc *YugaByteDbClient) GetClient() *gorm.DB {
+func (yc *YugaByteDBClient) GetClient() *gorm.DB {
 	return yc.Client
 }
 
 // Migrate create initial tables
-func (yc *YugaByteDbClient) Migrate(tables []interface{}) {
+func (yc *YugaByteDBClient) Migrate(tables []interface{}) {
 	for _, tabele := range tables {
-		yc.Client.AutoMigrate(tabele)
+		if err := yc.Client.AutoMigrate(tabele); err != nil {
+			panic(err)
+		}
 	}
-
 }

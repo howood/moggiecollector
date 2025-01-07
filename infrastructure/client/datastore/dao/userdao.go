@@ -10,6 +10,8 @@ import (
 type UsersDao struct{}
 
 // NewUsersDao creates a new UserRepository
+//
+//nolint:ireturn
 func NewUsersDao() repository.UserRepository {
 	return &UsersDao{}
 }
@@ -70,5 +72,4 @@ func (u *UsersDao) InActive(db *gorm.DB, userID uint64) error {
 		model.UserStatusActive,
 		userID,
 	).Update("status", model.UserStatusInActive).Error
-
 }

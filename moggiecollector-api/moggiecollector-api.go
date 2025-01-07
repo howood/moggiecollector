@@ -15,7 +15,6 @@ import (
 )
 
 func main() {
-
 	defaultPort := utils.GetOsEnv("SERVER_PORT", "8080")
 
 	dataStore := dbcluster.NewDatastore()
@@ -37,7 +36,7 @@ func main() {
 
 	jwtconfig := echojwt.Config{
 		Skipper: custommiddleware.OptionsMethodSkipper,
-		NewClaimsFunc: func(c echo.Context) jwt.Claims {
+		NewClaimsFunc: func(_ echo.Context) jwt.Claims {
 			return new(entity.JwtClaims)
 		},
 		SigningKey: []byte(actor.TokenSecret),
@@ -46,5 +45,4 @@ func main() {
 	e.GET("/profile", handler.ClientHandler{}.GetProfile, echojwt.WithConfig(jwtconfig))
 
 	e.Logger.Fatal(e.Start(":" + defaultPort))
-
 }
