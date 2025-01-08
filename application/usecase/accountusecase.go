@@ -46,7 +46,8 @@ func (au *AccountUsecase) CreateUser(ctx context.Context, userDto *dto.UserDto) 
 		return err
 	}
 	return au.DataStore.DBInstanceClient(ctx).Transaction(func(tx *gorm.DB) error {
-		if _, err := au.DataStore.DSRepository().UserRepository.GetByEmail(tx, userDto.Email); err != nil && !au.DataStore.RecordNotFoundError(err) {
+		_, err := au.DataStore.DSRepository().UserRepository.GetByEmail(tx, userDto.Email)
+		if err != nil && !au.DataStore.RecordNotFoundError(err) {
 			return err
 		}
 		if err == nil {

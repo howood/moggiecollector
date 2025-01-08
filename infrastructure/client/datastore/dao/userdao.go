@@ -34,21 +34,21 @@ func (u *UsersDao) GetAllWithInActive(db *gorm.DB) ([]model.User, error) {
 // Get is get by id
 func (u *UsersDao) Get(db *gorm.DB, userID uuid.UUID) (model.User, error) {
 	user := model.User{}
-	err := db.Where("status = ? AND user_id = ?", model.UserStatusActive, userID).First(&user).Error
+	err := db.Where("status = ? AND user_id = ?", model.UserStatusActive, userID).Where("deleted_at IS NULL").First(&user).Error
 	return user, err
 }
 
 // GetByIDAndEmail is get by id and email
 func (u *UsersDao) GetByIDAndEmail(db *gorm.DB, userID uuid.UUID, email string) (model.User, error) {
 	user := model.User{}
-	err := db.Where("status = ? AND user_id = ? AND email = ?", model.UserStatusActive, userID, email).First(&user).Error
+	err := db.Where("status = ? AND user_id = ? AND email = ?", model.UserStatusActive, userID, email).Where("deleted_at IS NULL").First(&user).Error
 	return user, err
 }
 
 // GetByEmail is get by  email
 func (u *UsersDao) GetByEmail(db *gorm.DB, email string) (model.User, error) {
 	user := model.User{}
-	err := db.Where("status = ? AND email = ?", model.UserStatusActive, email).First(&user).Error
+	err := db.Where("status = ? AND email = ?", model.UserStatusActive, email).Where("deleted_at IS NULL").First(&user).Error
 	return user, err
 }
 
