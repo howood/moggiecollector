@@ -18,6 +18,15 @@ test:
 testv:
 	export GO111MODULE=on && go test ./... -v
 
+testm:
+	export GO111MODULE=on && go test  ./...  -run ${method} -v
+
+testparse: install-go-test-tparse
+	go test -count=1 --race ./...  -json  | tparse -all
+
+install-go-test-tparse:
+	go install github.com/mfridman/tparse@latest
+
 lint:
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.62.2 &&  \
 	./bin/golangci-lint run ./...

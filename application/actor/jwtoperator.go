@@ -6,6 +6,7 @@ import (
 	"time"
 
 	jwt "github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/howood/moggiecollector/domain/entity"
 	"github.com/howood/moggiecollector/domain/repository"
 	log "github.com/howood/moggiecollector/infrastructure/logger"
@@ -41,7 +42,7 @@ func NewJwtOperator() *JwtOperator {
 type jwtCreator struct{}
 
 // CreateToken creates a new token
-func (jc *jwtCreator) CreateToken(ctx context.Context, userID uint64, username string, admin bool, identifier string) string {
+func (jc *jwtCreator) CreateToken(ctx context.Context, userID uuid.UUID, username string, admin bool, identifier string) string {
 	expired, err := strconv.ParseInt(tokenExpired, 10, 64)
 	if err != nil {
 		log.Error(ctx, err.Error())

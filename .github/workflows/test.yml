@@ -28,4 +28,8 @@ jobs:
       run: make lint
 
     - name: Test
-      run: go test -v ./...
+      run: |
+        docker compose up -d postgres
+        sleep 30
+        docker compose run --rm moggiecollector make migrate
+        docker compose run --rm moggiecollector make testparse

@@ -1,9 +1,12 @@
 package entity
 
-import "github.com/howood/moggiecollector/domain/model"
+import (
+	"github.com/google/uuid"
+	"github.com/howood/moggiecollector/domain/model"
+)
 
 type User struct {
-	UserID uint64
+	UserID uuid.UUID
 	Name   string
 	Email  string
 	Status int64

@@ -15,7 +15,7 @@ import (
 // sql and database info.
 const (
 	Source        = "file://./database/migrations/"
-	dbPort string = "5432"
+	dbPort string = "5433"
 )
 
 //nolint:gochecknoglobals

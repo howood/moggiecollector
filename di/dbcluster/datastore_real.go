@@ -32,7 +32,7 @@ func NewDatastore() DataStore {
 
 	return &DataStoreReal{
 		dsRepository: &DataStoreRepository{
-			UserRepository: dao.NewUsersDao(),
+			UserRepository: dao.NewUserDao(),
 		},
 		dbInstance: dataaccessor.Instance,
 	}
