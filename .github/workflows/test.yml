@@ -32,7 +32,7 @@ jobs:
 
     - name: Lint
       run: |
-          docker compose run --rm authorization make lint
+          docker compose run --rm moggiecollector make lint
 
     - name: Test
       run: |
