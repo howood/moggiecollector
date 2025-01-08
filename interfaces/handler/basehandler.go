@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	jwt "github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/howood/moggiecollector/application/actor"
 	"github.com/howood/moggiecollector/application/validator"
 	"github.com/howood/moggiecollector/di/dbcluster"
@@ -45,7 +46,7 @@ func (bh BaseHandler) getClaimsFromToken(c echo.Context) *entity.JwtClaims {
 	return claims
 }
 
-func (bh BaseHandler) createToken(ctx context.Context, userID uint64, username string) string {
+func (bh BaseHandler) createToken(ctx context.Context, userID uuid.UUID, username string) string {
 	tokenstr := actor.NewJwtOperator().CreateToken(ctx, userID, username, false, "moggiecollector-api")
 	return tokenstr
 }

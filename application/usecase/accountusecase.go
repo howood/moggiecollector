@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/google/uuid"
 	"github.com/howood/moggiecollector/application/actor"
 	"github.com/howood/moggiecollector/di/dbcluster"
 	"github.com/howood/moggiecollector/domain/dto"
@@ -31,9 +32,8 @@ func (au *AccountUsecase) GetUsers(ctx context.Context, withinactive string) ([]
 	return au.convertToEntityUsers(users), err
 }
 
-func (au *AccountUsecase) GetUser(ctx context.Context, userid int) (*entity.User, error) {
-	//nolint:gosec
-	user, err := au.DataStore.DSRepository().UserRepository.Get(au.DataStore.DBInstanceClient(ctx), uint64(userid))
+func (au *AccountUsecase) GetUser(ctx context.Context, userid uuid.UUID) (*entity.User, error) {
+	user, err := au.DataStore.DSRepository().UserRepository.Get(au.DataStore.DBInstanceClient(ctx), userid)
 	if err != nil {
 		return &entity.User{}, err
 	}
@@ -46,7 +46,8 @@ func (au *AccountUsecase) CreateUser(ctx context.Context, userDto *dto.UserDto) 
 		return err
 	}
 	return au.DataStore.DBInstanceClient(ctx).Transaction(func(tx *gorm.DB) error {
-		if _, err := au.DataStore.DSRepository().UserRepository.GetByEmail(tx, userDto.Email); err != nil && !au.DataStore.RecordNotFoundError(err) {
+		_, err := au.DataStore.DSRepository().UserRepository.GetByEmail(tx, userDto.Email)
+		if err != nil && !au.DataStore.RecordNotFoundError(err) {
 			return err
 		}
 		if err == nil {
@@ -57,22 +58,20 @@ func (au *AccountUsecase) CreateUser(ctx context.Context, userDto *dto.UserDto) 
 	})
 }
 
-func (au *AccountUsecase) UpdateUser(ctx context.Context, userid int, userDto *dto.UserDto) error {
+func (au *AccountUsecase) UpdateUser(ctx context.Context, userid uuid.UUID, userDto *dto.UserDto) error {
 	user, err := au.createUser(ctx, userDto)
 	if err != nil {
 		return err
 	}
-	//nolint:gosec
-	user.UserID = uint64(userid)
+	user.UserID = userid
 	return au.DataStore.DBInstanceClient(ctx).Transaction(func(tx *gorm.DB) error {
 		return au.DataStore.DSRepository().UserRepository.Update(tx, &user)
 	})
 }
 
-func (au *AccountUsecase) InActiveUser(ctx context.Context, userid int) error {
+func (au *AccountUsecase) InActiveUser(ctx context.Context, userid uuid.UUID) error {
 	return au.DataStore.DBInstanceClient(ctx).Transaction(func(tx *gorm.DB) error {
-		//nolint:gosec
-		return au.DataStore.DSRepository().UserRepository.InActive(tx, uint64(userid))
+		return au.DataStore.DSRepository().UserRepository.InActive(tx, userid)
 	})
 }
 

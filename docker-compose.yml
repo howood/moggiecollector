@@ -1,0 +1,33 @@
+services:
+  # moggiecollector
+  moggiecollector:
+    image: golang:1.23
+    platform: linux/amd64
+    working_dir: /go/src/github.com/howood/moggiecollector
+    expose:
+      - 8080
+    ports:
+      - "8080:8080"
+    environment:
+      # enable / disable
+      VERIFY_MODE: enable
+      # minimum / few or empty
+      LOG_MODE: minimum
+      SERVER_PORT: 8080
+      DB_HOSTNAME: postgres
+      DB_PORT: 5432
+      DB_DBNAME: moggie_db
+      DB_USER: moggie_user
+      DB_PASSWORD: moggie_passwd
+      WORK: /go/src/github.com/howood/moggiecollector
+    volumes:
+      - ./:/go/src/github.com/howood/moggiecollector:cached
+  postgres:
+    image: postgres:17.2
+    platform: linux/x86_64
+    tty: true
+    stdin_open: true
+    environment:
+      POSTGRES_DB: moggie_db
+      POSTGRES_USER: moggie_user
+      POSTGRES_PASSWORD: moggie_passwd

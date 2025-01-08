@@ -12,14 +12,14 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-// YugaByteDBClient is YugaByteDb Client
-type YugaByteDBClient struct {
+// PostgresClient is PostgreSQL Client
+type PostgresClient struct {
 	Client *gorm.DB
 }
 
-// NewYugaByteDBClient creates a new YugaByteDBClient
-func NewYugaByteDBClient() *YugaByteDBClient {
-	ret := &YugaByteDBClient{Client: generateConnection()}
+// NewPostgresClient creates a new PostgresClient
+func NewPostgresClient() *PostgresClient {
+	ret := &PostgresClient{Client: generateConnection()}
 	return ret
 }
 
@@ -28,11 +28,11 @@ func generateConnection() *gorm.DB {
 	var err error
 	dbURI := fmt.Sprintf(
 		"host=%s port=%d user=%s dbname=%s sslmode=disable password=%s",
-		os.Getenv("YUGABYTEDB_HOSTNAME"),
-		utils.GetOsEnvInt("YUGABYTEDB_PORT", 5433),
-		os.Getenv("YUGABYTEDB_USER"),
-		os.Getenv("YUGABYTEDB_DBNAME"),
-		os.Getenv("YUGABYTEDB_PASSWORD"),
+		os.Getenv("DB_HOSTNAME"),
+		utils.GetOsEnvInt("DB_PORT", 5433),
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_DBNAME"),
+		os.Getenv("DB_PASSWORD"),
 	)
 
 	dbInstance, err := gorm.Open(postgres.Open(dbURI), gormConfig())
@@ -65,12 +65,12 @@ func gormConfig() gorm.Option {
 	}
 }
 
-func (yc *YugaByteDBClient) GetClient() *gorm.DB {
+func (yc *PostgresClient) GetClient() *gorm.DB {
 	return yc.Client
 }
 
 // Migrate create initial tables
-func (yc *YugaByteDBClient) Migrate(tables []interface{}) {
+func (yc *PostgresClient) Migrate(tables []interface{}) {
 	for _, tabele := range tables {
 		if err := yc.Client.AutoMigrate(tabele); err != nil {
 			panic(err)

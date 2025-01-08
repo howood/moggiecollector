@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type UserStatus int64
 
@@ -11,12 +15,13 @@ const (
 
 // User entity
 type User struct {
-	UserID    uint64 `gorm:"primary_key"`
+	UserID    uuid.UUID `gorm:"type:uuid;primaryKey;size:255;default:uuid_generate_v4()"`
 	Name      string
-	Email     string `gorm:"index:email"`
+	Email     string `gorm:"index:users_email_index"`
 	Password  string
 	Salt      string
-	Status    int64 `gorm:"index:status"`
+	Status    int64 `gorm:"index:users_status_index"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
+	DeletedAt *time.Time `gorm:"index:users_deleted_at_index"`
 }

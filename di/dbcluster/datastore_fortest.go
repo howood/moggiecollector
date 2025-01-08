@@ -25,7 +25,7 @@ func NewDatastoreForTest(testTx *gorm.DB) DataStore {
 
 	return &DataStoreTest{
 		dsRepository: &DataStoreRepository{
-			UserRepository: dao.NewUsersDao(),
+			UserRepository: dao.NewUserDao(),
 		},
 		dbInstance: dataaccessor.Instance,
 		testTx:     testTx,

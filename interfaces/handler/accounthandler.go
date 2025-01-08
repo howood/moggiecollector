@@ -2,8 +2,8 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/howood/moggiecollector/domain/dto"
 	"github.com/howood/moggiecollector/domain/entity"
 	log "github.com/howood/moggiecollector/infrastructure/logger"
@@ -39,7 +39,11 @@ func (ch AccountHandler) GetUser(c echo.Context) error {
 	log.Info(ctx, "========= START REQUEST : "+requesturi)
 	log.Info(ctx, c.Request().Method)
 	log.Info(ctx, c.Request().Header)
-	userid, _ := strconv.Atoi(c.Param("id"))
+
+	userid, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
+	}
 	user, err := ch.UcCluster.AccountUC.GetUser(ctx, userid)
 	if err != nil {
 		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
@@ -79,16 +83,17 @@ func (ch AccountHandler) UpdateUser(c echo.Context) error {
 	log.Info(ctx, "========= START REQUEST : "+requesturi)
 	log.Info(ctx, c.Request().Method)
 	log.Info(ctx, c.Request().Header)
-	userid, _ := strconv.Atoi(c.Param("id"))
-	form := request.CreateUserForm{}
-	var err error
-	if err == nil {
-		err = c.Bind(&form)
-	}
-	if err == nil {
-		err = ch.validate(form)
-	}
+
+	userid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
+		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
+	}
+
+	form := request.CreateUserForm{}
+	if err = c.Bind(&form); err != nil {
+		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
+	}
+	if err = ch.validate(form); err != nil {
 		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
 	err = ch.UcCluster.AccountUC.UpdateUser(ctx, userid, ch.convertToUserDto(form))
@@ -105,9 +110,13 @@ func (ch AccountHandler) InActiveUser(c echo.Context) error {
 	log.Info(ctx, "========= START REQUEST : "+requesturi)
 	log.Info(ctx, c.Request().Method)
 	log.Info(ctx, c.Request().Header)
-	userid, _ := strconv.Atoi(c.Param("id"))
-	err := ch.UcCluster.AccountUC.InActiveUser(ctx, userid)
+
+	userid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
+		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
+	}
+
+	if err := ch.UcCluster.AccountUC.InActiveUser(ctx, userid); err != nil {
 		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
 	return c.JSONPretty(http.StatusOK, map[string]interface{}{"message": "success"}, marshalIndent)
@@ -121,24 +130,19 @@ func (ch AccountHandler) Login(c echo.Context) error {
 	log.Info(ctx, c.Request().Method)
 	log.Info(ctx, c.Request().Header)
 	form := request.LoginUserForm{}
-	var token string
-	var err error
-	if err == nil {
-		err = c.Bind(&form)
-	}
-	if err == nil {
-		err = ch.validate(form)
-	}
-	if err != nil {
+	if err := c.Bind(&form); err != nil {
 		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
+	if err := ch.validate(form); err != nil {
+		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
+	}
+
 	user, err := ch.UcCluster.AccountUC.AuthUser(ctx, ch.convertToLoginrDto(form))
 	if err != nil {
 		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
-	if err == nil {
-		token = ch.createToken(ctx, user.UserID, user.Email)
-	}
+	token := ch.createToken(ctx, user.UserID, user.Email)
+
 	return c.JSONPretty(http.StatusOK, map[string]interface{}{"token": token}, marshalIndent)
 }
 
