@@ -24,7 +24,7 @@ jobs:
     - name: Build
       run: go build -v ./...
 
-  test:
+  lint:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -34,9 +34,15 @@ jobs:
       run: |
           docker compose run --rm moggiecollector make lint
 
-#    - name: Test
-#      run: |
-#        docker compose up -d postgres
-#        sleep 30
-#        docker compose run --rm moggiecollector make migrate
-#        docker compose run --rm moggiecollector make testparse
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Test
+      run: |
+        docker compose up -d postgres
+        sleep 30
+        docker compose run --rm moggiecollector make migrate
+        docker compose run --rm moggiecollector make testparse
