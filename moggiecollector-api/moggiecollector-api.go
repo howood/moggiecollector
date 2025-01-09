@@ -4,6 +4,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/howood/moggiecollector/application/actor"
 	"github.com/howood/moggiecollector/di/dbcluster"
+	"github.com/howood/moggiecollector/di/svcluster"
 	"github.com/howood/moggiecollector/di/uccluster"
 	"github.com/howood/moggiecollector/domain/entity"
 	"github.com/howood/moggiecollector/infrastructure/custommiddleware"
@@ -19,20 +20,23 @@ func main() {
 
 	dataStore := dbcluster.NewDatastore()
 	uccluster := uccluster.NewUsecaseCluster(dataStore)
-	baseHandler := handler.BaseHandler{UcCluster: uccluster}
+	sccluster := svcluster.NewServiceCluster(dataStore)
+	baseHandler := handler.BaseHandler{UcCluster: uccluster, SvCluster: sccluster}
 
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
 
-	e.GET("/users", handler.AccountHandler{BaseHandler: baseHandler}.GetUsers)
-	e.GET("/users/:id", handler.AccountHandler{BaseHandler: baseHandler}.GetUser)
-	e.POST("/users", handler.AccountHandler{BaseHandler: baseHandler}.CreateUser)
-	e.PUT("/users/:id", handler.AccountHandler{BaseHandler: baseHandler}.UpdateUser)
-	e.DELETE("/users/:id", handler.AccountHandler{BaseHandler: baseHandler}.InActiveUser)
+	v1AdminAPI := e.Group("/admin/v1", custommiddleware.RequestLog(sccluster))
 
-	e.POST("/login", handler.AccountHandler{BaseHandler: baseHandler}.Login)
+	v1AdminAPI.GET("/users", handler.AccountHandler{BaseHandler: baseHandler}.GetUsers)
+	v1AdminAPI.GET("/users/:id", handler.AccountHandler{BaseHandler: baseHandler}.GetUser)
+	v1AdminAPI.POST("/users", handler.AccountHandler{BaseHandler: baseHandler}.CreateUser)
+	v1AdminAPI.PUT("/users/:id", handler.AccountHandler{BaseHandler: baseHandler}.UpdateUser)
+	v1AdminAPI.DELETE("/users/:id", handler.AccountHandler{BaseHandler: baseHandler}.InActiveUser)
+
+	v1AdminAPI.POST("/login", handler.AccountHandler{BaseHandler: baseHandler}.Login)
 
 	jwtconfig := echojwt.Config{
 		Skipper: custommiddleware.OptionsMethodSkipper,
@@ -42,7 +46,8 @@ func main() {
 		SigningKey: []byte(actor.TokenSecret),
 		ContextKey: actor.JWTContextKey,
 	}
-	e.GET("/profile", handler.ClientHandler{}.GetProfile, echojwt.WithConfig(jwtconfig))
+	v1API := e.Group("/api/v1", echojwt.WithConfig(jwtconfig), custommiddleware.RequestLog(sccluster))
+	v1API.GET("/profile", handler.ClientHandler{}.GetProfile, echojwt.WithConfig(jwtconfig))
 
 	e.Logger.Fatal(e.Start(":" + defaultPort))
 }

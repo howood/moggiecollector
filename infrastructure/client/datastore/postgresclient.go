@@ -1,46 +1,39 @@
 package datastore
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"time"
 
-	"github.com/howood/moggiecollector/library/utils"
+	"github.com/howood/moggiecollector/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-// PostgresClient is PostgreSQL Client
+// MysqlClient is Mysql Client.
 type PostgresClient struct {
 	Client *gorm.DB
 }
 
-// NewPostgresClient creates a new PostgresClient
+// NewMysqlClient creates a new MysqlClient.
 func NewPostgresClient() *PostgresClient {
 	ret := &PostgresClient{Client: generateConnection()}
+
 	return ret
 }
 
-//nolint:mnd
 func generateConnection() *gorm.DB {
-	var err error
-	dbURI := fmt.Sprintf(
-		"host=%s port=%d user=%s dbname=%s sslmode=disable password=%s",
-		os.Getenv("DB_HOSTNAME"),
-		utils.GetOsEnvInt("DB_PORT", 5433),
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_DBNAME"),
-		os.Getenv("DB_PASSWORD"),
-	)
-
-	dbInstance, err := gorm.Open(postgres.Open(dbURI), gormConfig())
+	dbInstance, err := gorm.Open(postgres.Open(dsn()), gormConfig())
 	if err != nil {
 		panic(err)
 	}
-	err = dbInstance.Exec("SET SESSION CHARACTERISTICS AS TRANSACTION ISOLATION LEVEL SERIALIZABLE").Error
-	if err != nil {
+
+	if err := dbInstance.Exec("SET SESSION CHARACTERISTICS AS TRANSACTION ISOLATION LEVEL SERIALIZABLE").Error; err != nil {
+		panic(err)
+	}
+
+	if err := dbInstance.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`).Error; err != nil {
 		panic(err)
 	}
 
@@ -49,11 +42,26 @@ func generateConnection() *gorm.DB {
 
 //nolint:ireturn
 func gormConfig() gorm.Option {
+	var loglevel logger.LogLevel
+
+	switch os.Getenv("LOG_LEVEL") {
+	case "DEBUG":
+		loglevel = logger.Info
+	case "INFO":
+		loglevel = logger.Info
+	case "WARN":
+		loglevel = logger.Warn
+	case "ERROR":
+		loglevel = logger.Error
+	default:
+		loglevel = logger.Silent
+	}
+
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		logger.Config{
 			SlowThreshold:             time.Second,
-			LogLevel:                  logger.Info,
+			LogLevel:                  loglevel,
 			IgnoreRecordNotFoundError: true,
 			ParameterizedQueries:      false,
 			Colorful:                  false,
@@ -65,15 +73,19 @@ func gormConfig() gorm.Option {
 	}
 }
 
-func (yc *PostgresClient) GetClient() *gorm.DB {
-	return yc.Client
+func (pg *PostgresClient) GetClient() *gorm.DB {
+	return pg.Client
 }
 
-// Migrate create initial tables
-func (yc *PostgresClient) Migrate(tables []interface{}) {
+func (pg *PostgresClient) Migrate(tables []interface{}) {
 	for _, tabele := range tables {
-		if err := yc.Client.AutoMigrate(tabele); err != nil {
+		err := pg.Client.AutoMigrate(tabele)
+		if err != nil {
 			panic(err)
 		}
 	}
+}
+
+func dsn() string {
+	return config.DatabaseDSN()
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/howood/moggiecollector/application/actor"
 	"github.com/howood/moggiecollector/application/validator"
 	"github.com/howood/moggiecollector/di/dbcluster"
+	"github.com/howood/moggiecollector/di/svcluster"
 	"github.com/howood/moggiecollector/di/uccluster"
 	"github.com/howood/moggiecollector/domain/entity"
 	"github.com/howood/moggiecollector/infrastructure/requestid"
@@ -22,6 +23,7 @@ const marshalIndent = "    "
 // BaseHandler struct
 type BaseHandler struct {
 	UcCluster *uccluster.UsecaseCluster
+	SvCluster *svcluster.ServiceCluster
 }
 
 //nolint:unparam

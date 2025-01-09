@@ -8,7 +8,8 @@ import (
 )
 
 type DataStoreRepository struct {
-	UserRepository repository.UserRepository
+	UserRepository       repository.UserRepository
+	RequestLogRepository repository.RequestLogRepository
 }
 type DataStore interface {
 	DSRepository() *DataStoreRepository
