@@ -27,12 +27,14 @@ func NewDatastore() DataStore {
 	dataaccessor := client.NewDatastorAssessor()
 	tables := []interface{}{
 		&model.User{},
+		&model.RequestLog{},
 	}
 	dataaccessor.Instance.Migrate(tables)
 
 	return &DataStoreReal{
 		dsRepository: &DataStoreRepository{
-			UserRepository: dao.NewUserDao(),
+			UserRepository:       dao.NewUserDao(),
+			RequestLogRepository: dao.NewRequestLogDao(),
 		},
 		dbInstance: dataaccessor.Instance,
 	}
