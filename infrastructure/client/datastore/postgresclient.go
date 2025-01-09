@@ -11,12 +11,12 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-// MysqlClient is Mysql Client.
+// PostgresClient is PostgreSQL Client.
 type PostgresClient struct {
 	Client *gorm.DB
 }
 
-// NewMysqlClient creates a new MysqlClient.
+// NewPostgresClient creates a new PostgresClient.
 func NewPostgresClient() *PostgresClient {
 	ret := &PostgresClient{Client: generateConnection()}
 
