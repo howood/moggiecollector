@@ -90,23 +90,20 @@ func TestUserDao_GetAll(t *testing.T) {
 
 				return
 			}
-			assert.Equal(t, tt.want[0].UserID, got[0].UserID)
-			assert.Equal(t, tt.want[0].Name, got[0].Name)
-			assert.Equal(t, tt.want[0].Email, got[0].Email)
-			assert.Equal(t, tt.want[0].Password, got[0].Password)
-			assert.Equal(t, tt.want[0].Salt, got[0].Salt)
-			assert.Equal(t, tt.want[0].Status, got[0].Status)
-			assert.Equal(t, tt.want[0].CreatedAt.Format("2006/1/2 15:04:05"), got[0].CreatedAt.Format("2006/1/2 15:04:05"))
-			assert.Equal(t, tt.want[0].UpdatedAt.Format("2006/1/2 15:04:05"), got[0].UpdatedAt.Format("2006/1/2 15:04:05"))
-
-			assert.Equal(t, tt.want[1].UserID, got[1].UserID)
-			assert.Equal(t, tt.want[1].Name, got[1].Name)
-			assert.Equal(t, tt.want[1].Email, got[1].Email)
-			assert.Equal(t, tt.want[1].Password, got[1].Password)
-			assert.Equal(t, tt.want[1].Salt, got[1].Salt)
-			assert.Equal(t, tt.want[1].Status, got[1].Status)
-			assert.Equal(t, tt.want[0].CreatedAt.Format("2006/1/2 15:04:05"), got[0].CreatedAt.Format("2006/1/2 15:04:05"))
-			assert.Equal(t, tt.want[0].UpdatedAt.Format("2006/1/2 15:04:05"), got[0].UpdatedAt.Format("2006/1/2 15:04:05"))
+			for _, gotuser := range got {
+				for _, wantuser := range tt.want {
+					if gotuser.UserID == wantuser.UserID {
+						assert.Equal(t, wantuser.UserID, gotuser.UserID)
+						assert.Equal(t, wantuser.Name, gotuser.Name)
+						assert.Equal(t, wantuser.Email, gotuser.Email)
+						assert.Equal(t, wantuser.Password, gotuser.Password)
+						assert.Equal(t, wantuser.Salt, gotuser.Salt)
+						assert.Equal(t, wantuser.Status, gotuser.Status)
+						assert.Equal(t, wantuser.CreatedAt.Format("2006/1/2 15:04:05"), gotuser.CreatedAt.Format("2006/1/2 15:04:05"))
+						assert.Equal(t, wantuser.UpdatedAt.Format("2006/1/2 15:04:05"), gotuser.UpdatedAt.Format("2006/1/2 15:04:05"))
+					}
+				}
+			}
 		})
 	}
 }

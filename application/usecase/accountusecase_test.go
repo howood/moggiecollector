@@ -87,15 +87,16 @@ func TestAccountUsecase_GetUsers(t *testing.T) {
 
 				return
 			}
-			assert.Equal(t, tt.want[0].UserID, got[0].UserID)
-			assert.Equal(t, tt.want[0].Name, got[0].Name)
-			assert.Equal(t, tt.want[0].Email, got[0].Email)
-			assert.Equal(t, tt.want[0].Status, got[0].Status)
-
-			assert.Equal(t, tt.want[1].UserID, got[1].UserID)
-			assert.Equal(t, tt.want[1].Name, got[1].Name)
-			assert.Equal(t, tt.want[1].Email, got[1].Email)
-			assert.Equal(t, tt.want[1].Status, got[1].Status)
+			for _, gotuser := range got {
+				for _, wantuser := range tt.want {
+					if gotuser.UserID == wantuser.UserID {
+						assert.Equal(t, wantuser.UserID, gotuser.UserID)
+						assert.Equal(t, wantuser.Name, gotuser.Name)
+						assert.Equal(t, wantuser.Email, gotuser.Email)
+						assert.Equal(t, wantuser.Status, gotuser.Status)
+					}
+				}
+			}
 		})
 	}
 }

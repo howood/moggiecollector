@@ -3,6 +3,9 @@
 update:
 	go mod tidy
 
+upgrade:
+	go get -u ./...
+
 installapi:
 	cd /go/src/github.com/howood/moggiecollector/moggiecollector && export GO111MODULE=on && go install
 

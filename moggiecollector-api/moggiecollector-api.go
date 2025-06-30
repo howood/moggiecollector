@@ -36,8 +36,6 @@ func main() {
 	v1AdminAPI.PUT("/users/:id", handler.AccountHandler{BaseHandler: baseHandler}.UpdateUser)
 	v1AdminAPI.DELETE("/users/:id", handler.AccountHandler{BaseHandler: baseHandler}.InActiveUser)
 
-	v1AdminAPI.POST("/login", handler.AccountHandler{BaseHandler: baseHandler}.Login)
-
 	jwtconfig := echojwt.Config{
 		Skipper: custommiddleware.OptionsMethodSkipper,
 		NewClaimsFunc: func(_ echo.Context) jwt.Claims {
@@ -46,7 +44,8 @@ func main() {
 		SigningKey: []byte(actor.TokenSecret),
 		ContextKey: actor.JWTContextKey,
 	}
-	v1API := e.Group("/api/v1", echojwt.WithConfig(jwtconfig), custommiddleware.RequestLog(sccluster))
+	v1API := e.Group("/api/v1", custommiddleware.RequestLog(sccluster))
+	v1API.POST("/login", handler.AccountHandler{BaseHandler: baseHandler}.Login)
 	v1API.GET("/profile", handler.ClientHandler{}.GetProfile, echojwt.WithConfig(jwtconfig))
 
 	e.Logger.Fatal(e.Start(":" + defaultPort))
