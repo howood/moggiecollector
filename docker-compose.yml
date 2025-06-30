@@ -19,15 +19,23 @@ services:
       DB_DBNAME: moggie_db
       DB_USER: moggie_user
       DB_PASSWORD: moggie_passwd
+      REDISHOST: redis
+      REDISPORT: 6379
+      REDISTLS:
+      REDISPASSWORD:
+      AUTH_CACHED_DB: 0
       WORK: /go/src/github.com/howood/moggiecollector
     volumes:
       - ./:/go/src/github.com/howood/moggiecollector:cached
   postgres:
-    image: postgres:17.2
-    platform: linux/x86_64
+    image: postgres:17.5
+    platform: linux/amd64
     tty: true
     stdin_open: true
     environment:
       POSTGRES_DB: moggie_db
       POSTGRES_USER: moggie_user
       POSTGRES_PASSWORD: moggie_passwd
+  redis:
+    image: redis:latest
+    platform: linux/amd64
