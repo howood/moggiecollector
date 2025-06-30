@@ -6,10 +6,10 @@ import (
 	"golang.org/x/crypto/sha3"
 )
 
-// DataHash struct
+// DataHash struct.
 type DataHash struct{}
 
-// GetHash get hashed data
+// GetHash get hashed data.
 func (dh DataHash) GetHash(data string) string {
 	// A MAC with 64 bytes of output has 512-bit security strength
 	//nolint:mnd

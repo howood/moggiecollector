@@ -13,25 +13,53 @@ import (
 	"golang.org/x/crypto/scrypt"
 )
 
-// SaltBufLen is Salt buffer length
+// SaltBufLen is Salt buffer length.
 const SaltBufLen = 14
 
-// HashtypeScrypt is Hashtype scrypt
+// HashtypeScrypt is Hashtype scrypt.
 const HashtypeScrypt = "scrypt"
 
-// HashtypeBcrypt is Hashtype bcrypt
+// HashtypeBcrypt is Hashtype bcrypt.
 const HashtypeBcrypt = "bcrypt"
 
-// WrongPasswordMessage is error message
+// WrongPasswordMessage is error message.
 const WrongPasswordMessage = "wrong Password"
 
-// PasswordHash struct
+// PasswordHash struct.
 type PasswordHash struct {
 	Type         string
 	ScryptN      int
 	ScryptR      int
 	ScryptP      int
 	ScryptKeylen int
+}
+
+// GetHashed get hashed password and salt.
+func (ph PasswordHash) GetHashed(ctx context.Context, password string) (string, string, error) {
+	switch ph.Type {
+	case HashtypeScrypt:
+		saltstr := ph.getSalt(ctx)
+		hashedpasswd, err := ph.hashWithScrypt(password, saltstr)
+		return hashedpasswd, saltstr, err
+	case HashtypeBcrypt:
+		hashedpasswd, err := ph.hashWithBcrypt(password)
+		return hashedpasswd, "", err
+	default:
+		hashedpasswd, err := ph.hashWithBcrypt(password)
+		return hashedpasswd, "", err
+	}
+}
+
+// Compare compares hashed password and string password.
+func (ph PasswordHash) Compare(hashedpassword, password, saltstr string) error {
+	switch ph.Type {
+	case HashtypeScrypt:
+		return ph.comparePasswordWithScrypt(hashedpassword, password, saltstr)
+	case HashtypeBcrypt:
+		return ph.comparePasswordWithBcrypt(hashedpassword, password)
+	default:
+		return ph.comparePasswordWithBcrypt(hashedpassword, password)
+	}
 }
 
 func (ph PasswordHash) getSalt(ctx context.Context) string {
@@ -79,32 +107,4 @@ func (ph PasswordHash) hashWithBcrypt(password string) (string, error) {
 
 func (ph PasswordHash) comparePasswordWithBcrypt(hashedpassword, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedpassword), []byte(password))
-}
-
-// GetHashed get hashed password and salt
-func (ph PasswordHash) GetHashed(ctx context.Context, password string) (string, string, error) {
-	switch ph.Type {
-	case HashtypeScrypt:
-		saltstr := ph.getSalt(ctx)
-		hashedpasswd, err := ph.hashWithScrypt(password, saltstr)
-		return hashedpasswd, saltstr, err
-	case HashtypeBcrypt:
-		hashedpasswd, err := ph.hashWithBcrypt(password)
-		return hashedpasswd, "", err
-	default:
-		hashedpasswd, err := ph.hashWithBcrypt(password)
-		return hashedpasswd, "", err
-	}
-}
-
-// Compare compares hashed password and string password
-func (ph PasswordHash) Compare(hashedpassword, password, saltstr string) error {
-	switch ph.Type {
-	case HashtypeScrypt:
-		return ph.comparePasswordWithScrypt(hashedpassword, password, saltstr)
-	case HashtypeBcrypt:
-		return ph.comparePasswordWithBcrypt(hashedpassword, password)
-	default:
-		return ph.comparePasswordWithBcrypt(hashedpassword, password)
-	}
 }

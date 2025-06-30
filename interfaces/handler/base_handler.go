@@ -26,7 +26,6 @@ type BaseHandler struct {
 	SvCluster *svcluster.ServiceCluster
 }
 
-//nolint:unparam
 func (bh BaseHandler) errorResponse(ctx context.Context, c echo.Context, statudcode int, err error) error {
 	if strings.Contains(strings.ToLower(err.Error()), dbcluster.RecordNotFoundMsg) {
 		statudcode = http.StatusNotFound

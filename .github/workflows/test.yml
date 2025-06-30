@@ -19,7 +19,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.23'
+        go-version: '1.24'
 
     - name: Build
       run: go build -v ./...
@@ -32,12 +32,12 @@ jobs:
 
     - uses: actions/setup-go@v4
       with:
-        go-version: '1.23'
+        go-version: '1.24'
         cache: false
     - name: golangci-lint
-      uses: golangci/golangci-lint-action@v3
+      uses: golangci/golangci-lint-action@v8
       with:
-        version: v1.62.2
+        version: latest
         working-directory: ./
 
   test:
@@ -48,7 +48,7 @@ jobs:
 
     - name: Test
       run: |
-        docker compose up -d postgres
+        docker compose up -d postgres redis
         sleep 30
         docker compose run --rm moggiecollector make migrate
         docker compose run --rm moggiecollector make testparse

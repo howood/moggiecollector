@@ -2,9 +2,7 @@ package datastore
 
 import "gorm.io/gorm"
 
-// DatastoreInstance interface
-//
-//nolint:revive
+// DatastoreInstance interface.
 type DatastoreInstance interface {
 	GetClient() *gorm.DB
 	Migrate(tables []interface{})

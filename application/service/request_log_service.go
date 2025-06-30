@@ -12,17 +12,22 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type RequestLogService struct {
+type RequestLogService interface {
+	CreateRequest(ctx context.Context, c echo.Context) error
+	CreateResponse(ctx context.Context, c echo.Context, response interface{}) error
+}
+type requestLogService struct {
 	DataStore dbcluster.DataStore
 }
 
-func NewRequestLogService(dataStore dbcluster.DataStore) *RequestLogService {
-	return &RequestLogService{
+//nolint:ireturn
+func NewRequestLogService(dataStore dbcluster.DataStore) RequestLogService {
+	return &requestLogService{
 		DataStore: dataStore,
 	}
 }
 
-func (rs *RequestLogService) CreateRequest(ctx context.Context, c echo.Context) error {
+func (rs *requestLogService) CreateRequest(ctx context.Context, c echo.Context) error {
 	requestLog := model.RequestLog{
 		XRequestID: fmt.Sprintf("%v", c.Get(echo.HeaderXRequestID)),
 		Endpoint:   c.Request().URL.RequestURI(),
@@ -37,7 +42,7 @@ func (rs *RequestLogService) CreateRequest(ctx context.Context, c echo.Context) 
 	return rs.DataStore.DSRepository().RequestLogRepository.Create(cli, requestLog)
 }
 
-func (rs *RequestLogService) CreateResponse(ctx context.Context, c echo.Context, response interface{}) error {
+func (rs *requestLogService) CreateResponse(ctx context.Context, c echo.Context, response interface{}) error {
 	res := fmt.Sprintf("%v", response)
 	requestLog := model.RequestLog{
 		XRequestID: fmt.Sprintf("%v", c.Get(echo.HeaderXRequestID)),
@@ -52,7 +57,7 @@ func (rs *RequestLogService) CreateResponse(ctx context.Context, c echo.Context,
 	return rs.DataStore.DSRepository().RequestLogRepository.Create(rs.DataStore.DBInstanceClient(ctx), requestLog)
 }
 
-func (rs *RequestLogService) readRequestBodyPrev(c echo.Context) *string {
+func (rs *requestLogService) readRequestBodyPrev(c echo.Context) *string {
 	if c.Request().Body == nil || c.Request().Body == http.NoBody {
 		return nil
 	}

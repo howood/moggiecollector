@@ -5,11 +5,12 @@ import (
 	"github.com/google/uuid"
 )
 
-// JwtClaims entity
+// JwtClaims entity.
 type JwtClaims struct {
+	jwt.RegisteredClaims
+
 	Name       string    `json:"name"`
 	UserID     uuid.UUID `json:"user_id"`
 	Admin      bool      `json:"admin"`
 	Identifier string    `json:"identifier"`
-	jwt.RegisteredClaims
 }

@@ -24,9 +24,10 @@ type DataStoreReal struct {
 //
 //nolint:ireturn
 func NewDatastore() DataStore {
-	dataaccessor := client.NewDatastorAssessor()
+	dataaccessor := client.NewDataStoreAccesser()
 	tables := []interface{}{
 		&model.User{},
+		&model.UserMfa{},
 		&model.RequestLog{},
 	}
 	dataaccessor.Instance.Migrate(tables)
@@ -34,6 +35,7 @@ func NewDatastore() DataStore {
 	return &DataStoreReal{
 		dsRepository: &DataStoreRepository{
 			UserRepository:       dao.NewUserDao(),
+			UserMfaRepository:    dao.NewUserMfaDao(),
 			RequestLogRepository: dao.NewRequestLogDao(),
 		},
 		dbInstance: dataaccessor.Instance,

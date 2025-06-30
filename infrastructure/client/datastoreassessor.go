@@ -7,16 +7,16 @@ import (
 
 const RecordNotFoundMsg = "record not found"
 
-// DatastorAssessor struct
+// DatastorAssessor struct.
 type DatastorAssessor struct {
 	Instance datastore.DatastoreInstance
 }
 
-// NewDatastorAssessor creates a new CacheAssessor
-func NewDatastorAssessor() *DatastorAssessor {
+// NewDataStoreAccesser creates a new CacheAssessor.
+func NewDataStoreAccesser() *DatastorAssessor {
 	var I *DatastorAssessor
-	switch utils.GetOsEnv("DATASTORE_TYPE", "yogabytedb") {
-	case "yogabytedb":
+	switch utils.GetOsEnv("DATASTORE_TYPE", "postgres") {
+	case "postgres":
 		I = &DatastorAssessor{
 			Instance: datastore.NewPostgresClient(),
 		}

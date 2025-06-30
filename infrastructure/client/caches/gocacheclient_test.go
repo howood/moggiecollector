@@ -1,6 +1,7 @@
 package caches_test
 
 import (
+	"context"
 	"reflect"
 	"testing"
 	"time"
@@ -13,10 +14,14 @@ func Test_GoCacheClient(t *testing.T) {
 
 	setkey := "testkey"
 	setdata := "setdata"
+	ctx := context.Background()
 	client := caches.NewGoCacheClient()
 	//nolint:errcheck
-	client.Set(setkey, setdata, 60*time.Second)
-	getdata, ok := client.Get(setkey)
+	client.Set(ctx, setkey, setdata, 60*time.Second)
+	getdata, ok, err := client.Get(ctx, setkey)
+	if err != nil {
+		t.Fatalf("failed to get cache: %v", err)
+	}
 	if !ok {
 		t.Fatalf("failed to get cache")
 	}

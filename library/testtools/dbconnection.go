@@ -12,7 +12,7 @@ func DBTx(t *testing.T) *gorm.DB {
 	t.Helper()
 
 	ctx := context.Background()
-	dataaccessor := client.NewDatastorAssessor()
+	dataaccessor := client.NewDataStoreAccesser()
 
 	tx := dataaccessor.Instance.GetClient().WithContext(ctx).Begin()
 	if tx.Error != nil {
@@ -22,12 +22,6 @@ func DBTx(t *testing.T) *gorm.DB {
 	t.Cleanup(func() {
 		if r := tx.Rollback(); r.Error != nil {
 			t.Fatalf("Failed to rollback the transaction: %v", r.Error)
-		}
-
-		sqlDB, _ := dataaccessor.Instance.GetClient().DB()
-
-		if err := sqlDB.Close(); err != nil {
-			t.Fatalf("Failed to close the connection %v", err)
 		}
 	})
 

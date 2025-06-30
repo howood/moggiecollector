@@ -9,6 +9,9 @@ import (
 
 const (
 	dbPort int = 5432
+
+	TotpPeriod       uint = 30
+	TotpRedisExpired int  = 60 * 15
 )
 
 func DatabaseDSN() string {

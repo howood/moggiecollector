@@ -1,18 +1,13 @@
 package model
 
-import (
-	"time"
-
-	"github.com/google/uuid"
-)
-
 const (
 	HTTPTypeRequest  = "request"
 	HTTPTypeResponse = "response"
 )
 
 type RequestLog struct {
-	ID         uuid.UUID `gorm:"type:uuid;primaryKey;size:255;default:uuid_generate_v4()"`
+	BaseModel
+
 	XRequestID string
 	Endpoint   string
 	Method     string
@@ -20,5 +15,4 @@ type RequestLog struct {
 	URLQuery   *string
 	Body       *string
 	Header     string
-	CreatedAt  time.Time
 }

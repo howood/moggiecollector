@@ -3,12 +3,23 @@ package datastore
 import (
 	"log"
 	"os"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/howood/moggiecollector/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+)
+
+var (
+	//nolint:gochecknoglobals
+	dbInstance *gorm.DB
+	//nolint:gochecknoglobals
+	dbOnce sync.Once
+	//nolint:gochecknoglobals
+	dbMutex sync.Mutex
 )
 
 // PostgresClient is PostgreSQL Client.
@@ -24,18 +35,26 @@ func NewPostgresClient() *PostgresClient {
 }
 
 func generateConnection() *gorm.DB {
-	dbInstance, err := gorm.Open(postgres.Open(dsn()), gormConfig())
-	if err != nil {
-		panic(err)
-	}
+	dbOnce.Do(func() {
+		dbMutex.Lock()
+		defer dbMutex.Unlock()
 
-	if err := dbInstance.Exec("SET SESSION CHARACTERISTICS AS TRANSACTION ISOLATION LEVEL SERIALIZABLE").Error; err != nil {
-		panic(err)
-	}
+		db, err := gorm.Open(postgres.Open(dsn()), gormConfig())
+		if err != nil {
+			panic(err)
+		}
 
-	if err := dbInstance.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`).Error; err != nil {
-		panic(err)
-	}
+		if err := db.Exec("SET SESSION CHARACTERISTICS AS TRANSACTION ISOLATION LEVEL SERIALIZABLE").Error; err != nil {
+			panic(err)
+		}
+
+		if err := db.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`).Error; err != nil {
+			if !strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+				panic(err)
+			}
+		}
+		dbInstance = db
+	})
 
 	return dbInstance
 }

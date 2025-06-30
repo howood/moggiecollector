@@ -38,25 +38,26 @@ func NewGoCacheClient() *GoCacheClient {
 }
 
 // Get gets from cache
-func (cc *GoCacheClient) Get(key string) (interface{}, bool) {
-	return cc.getInstance(key).Get(key)
+func (cc *GoCacheClient) Get(ctx context.Context, key string) (interface{}, bool, error) {
+	val, ok := cc.getInstance(ctx, key).Get(key)
+	return val, ok, nil
 }
 
 // Set puts to cache
-func (cc *GoCacheClient) Set(key string, value interface{}, ttl time.Duration) error {
-	cc.getInstance(key).Set(key, value, ttl)
+func (cc *GoCacheClient) Set(ctx context.Context, key string, value interface{}, ttl time.Duration) error {
+	cc.getInstance(ctx, key).Set(key, value, ttl)
 	return nil
 }
 
 // Del deletes from cache
-func (cc *GoCacheClient) Del(key string) error {
-	cc.getInstance(key).Delete(key)
+func (cc *GoCacheClient) Del(ctx context.Context, key string) error {
+	cc.getInstance(ctx, key).Delete(key)
 	return nil
 }
 
 // DelBulk bulk deletes from cache
-func (cc *GoCacheClient) DelBulk(key string) error {
-	cc.getInstance(key).Delete(key)
+func (cc *GoCacheClient) DelBulk(ctx context.Context, key string) error {
+	cc.getInstance(ctx, key).Delete(key)
 	return nil
 }
 
@@ -65,7 +66,7 @@ func (cc *GoCacheClient) CloseConnect() error {
 	return nil
 }
 
-func (cc *GoCacheClient) getInstance(key string) *cache.Cache {
+func (cc *GoCacheClient) getInstance(ctx context.Context, key string) *cache.Cache {
 	// djb2 algorithm
 	//nolint:mnd
 	hash := uint32(5381)
@@ -74,6 +75,6 @@ func (cc *GoCacheClient) getInstance(key string) *cache.Cache {
 		hash = ((hash << 5) + hash) + uint32(c)
 	}
 	i := int(hash) % NumInstance
-	log.Info(context.Background(), fmt.Sprintf("get_instance: %d", i))
+	log.Info(ctx, fmt.Sprintf("get_instance: %d", i))
 	return gocacheConnectionMap[i]
 }

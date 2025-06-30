@@ -19,24 +19,24 @@ func main() {
 	defaultPort := utils.GetOsEnv("SERVER_PORT", "8080")
 
 	dataStore := dbcluster.NewDatastore()
-	uccluster := uccluster.NewUsecaseCluster(dataStore)
-	sccluster := svcluster.NewServiceCluster(dataStore)
-	baseHandler := handler.BaseHandler{UcCluster: uccluster, SvCluster: sccluster}
+	svcluster := svcluster.NewServiceCluster(dataStore)
+	uccluster := uccluster.NewUsecaseCluster(dataStore, svcluster)
+	baseHandler := handler.BaseHandler{UcCluster: uccluster, SvCluster: svcluster}
 
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
 
-	v1AdminAPI := e.Group("/admin/v1", custommiddleware.RequestLog(sccluster))
+	v1AdminAPI := e.Group("/admin/v1", custommiddleware.RequestLog(svcluster))
 
-	v1AdminAPI.GET("/users", handler.AccountHandler{BaseHandler: baseHandler}.GetUsers)
-	v1AdminAPI.GET("/users/:id", handler.AccountHandler{BaseHandler: baseHandler}.GetUser)
-	v1AdminAPI.POST("/users", handler.AccountHandler{BaseHandler: baseHandler}.CreateUser)
-	v1AdminAPI.PUT("/users/:id", handler.AccountHandler{BaseHandler: baseHandler}.UpdateUser)
-	v1AdminAPI.DELETE("/users/:id", handler.AccountHandler{BaseHandler: baseHandler}.InActiveUser)
-
-	v1AdminAPI.POST("/login", handler.AccountHandler{BaseHandler: baseHandler}.Login)
+	v1AdminAPI.GET("/users", handler.UserHandler{BaseHandler: baseHandler}.GetUsers)
+	v1AdminAPI.GET("/users/:id", handler.UserHandler{BaseHandler: baseHandler}.GetUser)
+	v1AdminAPI.POST("/users", handler.UserHandler{BaseHandler: baseHandler}.CreateUser)
+	v1AdminAPI.PUT("/users/:id", handler.UserHandler{BaseHandler: baseHandler}.UpdateUser)
+	v1AdminAPI.DELETE("/users/:id", handler.UserHandler{BaseHandler: baseHandler}.InActiveUser)
+	v1AdminAPI.GET("/users/:id/mfa", handler.UserMfaHandler{BaseHandler: baseHandler}.InitialUserAuthenticator)
+	v1AdminAPI.PUT("/users/:id/mfa", handler.UserMfaHandler{BaseHandler: baseHandler}.UpsertUserAuthenticator)
 
 	jwtconfig := echojwt.Config{
 		Skipper: custommiddleware.OptionsMethodSkipper,
@@ -46,8 +46,10 @@ func main() {
 		SigningKey: []byte(actor.TokenSecret),
 		ContextKey: actor.JWTContextKey,
 	}
-	v1API := e.Group("/api/v1", echojwt.WithConfig(jwtconfig), custommiddleware.RequestLog(sccluster))
-	v1API.GET("/profile", handler.ClientHandler{}.GetProfile, echojwt.WithConfig(jwtconfig))
+	v1API := e.Group("/api/v1", custommiddleware.RequestLog(svcluster))
+	v1API.POST("/login", handler.AuthHandler{BaseHandler: baseHandler}.Login)
+	v1API.POST("/login/verify_authenticator", handler.AuthHandler{BaseHandler: baseHandler}.VerifyAuthenticator)
+	v1API.GET("/profile", handler.UserHandler{}.GetProfile, echojwt.WithConfig(jwtconfig))
 
 	e.Logger.Fatal(e.Start(":" + defaultPort))
 }
