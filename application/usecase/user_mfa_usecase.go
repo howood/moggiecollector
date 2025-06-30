@@ -4,13 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/howood/moggiecollector/config"
 	"github.com/howood/moggiecollector/di/dbcluster"
 	"github.com/howood/moggiecollector/di/svcluster"
 	"github.com/howood/moggiecollector/domain/dto"
 	"github.com/howood/moggiecollector/domain/entity"
 	"github.com/howood/moggiecollector/domain/model"
+	"github.com/howood/moggiecollector/library/utils"
 	"gorm.io/gorm"
 )
 
@@ -76,6 +79,48 @@ func (uc *UserMfaUsecase) GetDefaultMfa(ctx context.Context, userID uuid.UUID) (
 	return &mfaType, nil
 }
 
-func (uc *UserMfaUsecase) ValidateAuthenticatorCode(ctx context.Context, verifyMfaAuthenticator dto.VerifyMfaAuthenticator) (bool, error) {
-	return uc.SvCluster.AuthenticatorSV.Validate(ctx, verifyMfaAuthenticator.UserID, verifyMfaAuthenticator.Passcode)
+func (uc *UserMfaUsecase) ValidateAuthenticatorCode(ctx context.Context, verifyMfaAuthenticator *dto.VerifyMfaAuthenticator) (bool, *entity.User, error) {
+	val, ok, err := uc.SvCluster.AuthCacheSV.Get(ctx, verifyMfaAuthenticator.Identifier)
+	if err != nil {
+		return false, nil, err
+	}
+	if !ok {
+		return false, nil, errors.New("invalid identifier")
+	}
+
+	switch v := val.(type) {
+	case string:
+		var user entity.User
+		if err := utils.ByteToJSONStruct([]byte(v), &user); err != nil {
+			return false, nil, fmt.Errorf("failed to unmarshal user from cache: %w", err)
+		}
+		ok, err := uc.SvCluster.AuthenticatorSV.Validate(ctx, user.ID, verifyMfaAuthenticator.Passcode)
+		if err != nil {
+			return false, nil, fmt.Errorf("failed to validate passcode: %w", err)
+		}
+		if !ok {
+			return false, nil, errors.New("invalid passcode")
+		}
+		if err := uc.SvCluster.AuthCacheSV.Del(ctx, verifyMfaAuthenticator.Identifier); err != nil {
+			return false, nil, fmt.Errorf("failed to delete cache: %w", err)
+		}
+		return true, &user, nil
+	default:
+		return false, nil, fmt.Errorf("unexpected type %T for identifier", val)
+	}
+}
+
+func (uc *UserMfaUsecase) IsUseMfa(ctx context.Context, user *entity.User) (*entity.VerifyMfa, entity.MfaType, error) {
+	userMfa, err := uc.DataStore.DSRepository().UserMfaRepository.GetDefault(uc.DataStore.DBInstanceClient(ctx), user.ID)
+	if err != nil {
+		if !uc.DataStore.RecordNotFoundError(err) {
+			return nil, "", err
+		}
+		return nil, "", nil
+	}
+	verifyMfa := entity.NewVerifyMfa()
+	if err := uc.SvCluster.AuthCacheSV.Set(ctx, verifyMfa.Identifier, *user, time.Duration(config.TotpRedisExpired)*time.Second); err != nil {
+		return nil, "", err
+	}
+	return verifyMfa, entity.MfaType(userMfa.MfaType), nil
 }

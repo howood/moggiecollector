@@ -48,6 +48,7 @@ func main() {
 	}
 	v1API := e.Group("/api/v1", custommiddleware.RequestLog(svcluster))
 	v1API.POST("/login", handler.AuthHandler{BaseHandler: baseHandler}.Login)
+	v1API.POST("/login/verify_authenticator", handler.AuthHandler{BaseHandler: baseHandler}.VerifyAuthenticator)
 	v1API.GET("/profile", handler.UserHandler{}.GetProfile, echojwt.WithConfig(jwtconfig))
 
 	e.Logger.Fatal(e.Start(":" + defaultPort))

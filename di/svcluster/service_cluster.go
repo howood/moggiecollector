@@ -8,13 +8,15 @@ import (
 // DataStore interface.
 type ServiceCluster struct {
 	AuthenticatorSV service.AuthenticatorService
-	RequestLogSV    *service.RequestLogService
+	AuthCacheSV     service.AuthCacheService
+	RequestLogSV    service.RequestLogService
 }
 
 // NewDatastore returns DataStore interface.
 func NewServiceCluster(datastore dbcluster.DataStore) *ServiceCluster {
 	return &ServiceCluster{
 		AuthenticatorSV: service.NewAuthenticatorService(datastore),
+		AuthCacheSV:     service.NewAuthCacheService(),
 		RequestLogSV:    service.NewRequestLogService(datastore),
 	}
 }

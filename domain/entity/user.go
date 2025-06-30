@@ -1,6 +1,8 @@
 package entity
 
 import (
+	"encoding/json"
+
 	"github.com/google/uuid"
 	"github.com/howood/moggiecollector/domain/model"
 )
@@ -19,4 +21,8 @@ func NewUser(user *model.User) *User {
 		Email:  user.Email,
 		Status: user.Status,
 	}
+}
+
+func (u User) MarshalBinary() ([]byte, error) {
+	return json.Marshal(u)
 }

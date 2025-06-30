@@ -30,7 +30,7 @@ func NewAuthenticatorService(dataStore dbcluster.DataStore) AuthenticatorService
 }
 
 func (as *authenticatorSv) GenerateSecret(ctx context.Context, userID uuid.UUID) (string, error) {
-	return as.authenticator.GenerateKey(userID, config.TotpPeriodD)
+	return as.authenticator.GenerateKey(userID, config.TotpPeriod)
 }
 
 func (as *authenticatorSv) Validate(ctx context.Context, userID uuid.UUID, passcode string) (bool, error) {
@@ -38,9 +38,9 @@ func (as *authenticatorSv) Validate(ctx context.Context, userID uuid.UUID, passc
 	if err != nil {
 		return false, err
 	}
-	return as.authenticator.Validate(passcode, userMfa.Secret, config.TotpPeriodD)
+	return as.authenticator.Validate(passcode, userMfa.Secret, config.TotpPeriod)
 }
 
 func (as *authenticatorSv) ValidateBySecretString(ctx context.Context, passcode string, secret string) (bool, error) {
-	return as.authenticator.Validate(passcode, secret, config.TotpPeriodD)
+	return as.authenticator.Validate(passcode, secret, config.TotpPeriod)
 }

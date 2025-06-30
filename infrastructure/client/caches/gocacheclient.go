@@ -38,24 +38,25 @@ func NewGoCacheClient() *GoCacheClient {
 }
 
 // Get gets from cache
-func (cc *GoCacheClient) Get(key string) (interface{}, bool) {
-	return cc.getInstance(key).Get(key)
+func (cc *GoCacheClient) Get(_ context.Context, key string) (interface{}, bool, error) {
+	val, ok := cc.getInstance(key).Get(key)
+	return val, ok, nil
 }
 
 // Set puts to cache
-func (cc *GoCacheClient) Set(key string, value interface{}, ttl time.Duration) error {
+func (cc *GoCacheClient) Set(_ context.Context, key string, value interface{}, ttl time.Duration) error {
 	cc.getInstance(key).Set(key, value, ttl)
 	return nil
 }
 
 // Del deletes from cache
-func (cc *GoCacheClient) Del(key string) error {
+func (cc *GoCacheClient) Del(_ context.Context, key string) error {
 	cc.getInstance(key).Delete(key)
 	return nil
 }
 
 // DelBulk bulk deletes from cache
-func (cc *GoCacheClient) DelBulk(key string) error {
+func (cc *GoCacheClient) DelBulk(_ context.Context, key string) error {
 	cc.getInstance(key).Delete(key)
 	return nil
 }
