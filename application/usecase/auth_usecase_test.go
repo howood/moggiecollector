@@ -221,7 +221,7 @@ func TestAccountUsecase_CreateUser(t *testing.T) {
 			dataStore := dbcluster.NewDatastoreForTest(tx)
 			au := usecase.NewUserUsecase(dataStore)
 
-			err := au.CreateUser(ctx, tt.args.input)
+			_, err := au.CreateUser(ctx, tt.args.input)
 			if !tt.wantErr(t, err) || err != nil {
 				return
 			}

@@ -24,10 +24,10 @@ func NewAuthenticator() *Authenticator {
 	}
 }
 
-func (a *Authenticator) initializeKey(accountID uuid.UUID, period uint) (*otp.Key, error) {
+func (a *Authenticator) initializeKey(userID uuid.UUID, period uint) (*otp.Key, error) {
 	return totp.Generate(totp.GenerateOpts{
 		Issuer:      a.issuer,
-		AccountName: accountID.String(),
+		AccountName: userID.String(),
 		Period:      period,
 		SecretSize:  secretSize,
 		Secret:      nil,
@@ -37,8 +37,8 @@ func (a *Authenticator) initializeKey(accountID uuid.UUID, period uint) (*otp.Ke
 	})
 }
 
-func (a *Authenticator) GenerateKey(accountID uuid.UUID, period uint) (string, error) {
-	key, err := a.initializeKey(accountID, period)
+func (a *Authenticator) GenerateKey(userID uuid.UUID, period uint) (string, error) {
+	key, err := a.initializeKey(userID, period)
 	if err != nil {
 		return "", err
 	}

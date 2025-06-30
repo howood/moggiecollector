@@ -58,22 +58,18 @@ func (uh UserHandler) CreateUser(c echo.Context) error {
 	log.Info(ctx, "========= START REQUEST : "+requesturi)
 	log.Info(ctx, c.Request().Method)
 	log.Info(ctx, c.Request().Header)
-	form := request.CreateUserForm{}
-	var err error
-	if err == nil {
-		err = c.Bind(&form)
+	var form request.CreateUserForm
+	if err := c.Bind(&form); err != nil {
+		return uh.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
-	if err == nil {
-		err = uh.validate(form)
+	if err := uh.validate(form); err != nil {
+		return uh.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
+	user, err := uh.UcCluster.UserUC.CreateUser(ctx, uh.convertToUserDto(form))
 	if err != nil {
 		return uh.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
-	err = uh.UcCluster.UserUC.CreateUser(ctx, uh.convertToUserDto(form))
-	if err != nil {
-		return uh.errorResponse(ctx, c, http.StatusBadRequest, err)
-	}
-	return c.JSONPretty(http.StatusOK, map[string]interface{}{"message": "success"}, marshalIndent)
+	return c.JSONPretty(http.StatusOK, uh.responseUser(user), marshalIndent)
 }
 
 // CreateUser is get all users
@@ -96,11 +92,11 @@ func (uh UserHandler) UpdateUser(c echo.Context) error {
 	if err = uh.validate(form); err != nil {
 		return uh.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
-	err = uh.UcCluster.UserUC.UpdateUser(ctx, userid, uh.convertToUserDto(form))
+	user, err := uh.UcCluster.UserUC.UpdateUser(ctx, userid, uh.convertToUserDto(form))
 	if err != nil {
 		return uh.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
-	return c.JSONPretty(http.StatusOK, map[string]interface{}{"message": "success"}, marshalIndent)
+	return c.JSONPretty(http.StatusOK, uh.responseUser(user), marshalIndent)
 }
 
 // InActiveUser is get all users
@@ -140,13 +136,6 @@ func (uh UserHandler) GetProfile(c echo.Context) error {
 func (uh UserHandler) convertToUserDto(user request.CreateUserForm) *dto.UserDto {
 	return &dto.UserDto{
 		Name:     user.Name,
-		Email:    user.Email,
-		Password: user.Password,
-	}
-}
-
-func (uh UserHandler) convertToLoginrDto(user request.LoginUserForm) *dto.LoginDto {
-	return &dto.LoginDto{
 		Email:    user.Email,
 		Password: user.Password,
 	}

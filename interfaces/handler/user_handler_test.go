@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/howood/moggiecollector/di/dbcluster"
+	"github.com/howood/moggiecollector/di/svcluster"
 	"github.com/howood/moggiecollector/di/uccluster"
 	"github.com/howood/moggiecollector/domain/model"
 	"github.com/howood/moggiecollector/interfaces/handler"
@@ -82,7 +83,8 @@ func TestAccountHandler_GetUser(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tx := testtools.DBTx(t)
 			dataStore := dbcluster.NewDatastoreForTest(tx)
-			uccluster := uccluster.NewUsecaseCluster(dataStore)
+			svcluster := svcluster.NewServiceCluster(dataStore)
+			uccluster := uccluster.NewUsecaseCluster(dataStore, svcluster)
 			baseHandler := handler.BaseHandler{UcCluster: uccluster}
 
 			if err := tx.Create(initialData).Error; err != nil {

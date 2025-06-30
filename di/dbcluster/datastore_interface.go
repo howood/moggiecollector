@@ -9,6 +9,7 @@ import (
 
 type DataStoreRepository struct {
 	UserRepository       repository.UserRepository
+	UserMfaRepository    repository.UserMfaRepository
 	RequestLogRepository repository.RequestLogRepository
 }
 type DataStore interface {

@@ -40,13 +40,14 @@ func (uu *UserUsecase) GetUser(ctx context.Context, userid uuid.UUID) (*entity.U
 	return entity.NewUser(&user), nil
 }
 
-func (uu *UserUsecase) CreateUser(ctx context.Context, userDto *dto.UserDto) error {
+func (uu *UserUsecase) CreateUser(ctx context.Context, userDto *dto.UserDto) (*entity.User, error) {
 	user, err := uu.createUser(ctx, userDto)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return uu.DataStore.DBInstanceClient(ctx).Transaction(func(tx *gorm.DB) error {
-		_, err := uu.DataStore.DSRepository().UserRepository.GetByEmail(tx, userDto.Email)
+	err = uu.DataStore.DBInstanceClient(ctx).Transaction(func(tx *gorm.DB) error {
+		var err error
+		_, err = uu.DataStore.DSRepository().UserRepository.GetByEmail(tx, userDto.Email)
 		if err != nil && !uu.DataStore.RecordNotFoundError(err) {
 			return err
 		}
@@ -56,17 +57,25 @@ func (uu *UserUsecase) CreateUser(ctx context.Context, userDto *dto.UserDto) err
 		}
 		return uu.DataStore.DSRepository().UserRepository.Create(tx, &user)
 	})
+	if err != nil {
+		return nil, err
+	}
+	return uu.convertToEntityUser(user), nil
 }
 
-func (uu *UserUsecase) UpdateUser(ctx context.Context, userid uuid.UUID, userDto *dto.UserDto) error {
+func (uu *UserUsecase) UpdateUser(ctx context.Context, userid uuid.UUID, userDto *dto.UserDto) (*entity.User, error) {
 	user, err := uu.createUser(ctx, userDto)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	user.ID = userid
-	return uu.DataStore.DBInstanceClient(ctx).Transaction(func(tx *gorm.DB) error {
+	err = uu.DataStore.DBInstanceClient(ctx).Transaction(func(tx *gorm.DB) error {
 		return uu.DataStore.DSRepository().UserRepository.Update(tx, &user)
 	})
+	if err != nil {
+		return nil, err
+	}
+	return uu.convertToEntityUser(user), nil
 }
 
 func (uu *UserUsecase) InActiveUser(ctx context.Context, userid uuid.UUID) error {
@@ -96,17 +105,18 @@ func (uu *UserUsecase) createUser(ctx context.Context, userDto *dto.UserDto) (mo
 	}, nil
 }
 
+func (uu *UserUsecase) convertToEntityUser(user model.User) *entity.User {
+	return &entity.User{
+		ID:     user.ID,
+		Name:   user.Name,
+		Email:  user.Email,
+		Status: user.Status,
+	}
+}
 func (uu *UserUsecase) convertToEntityUsers(users []model.User) []*entity.User {
 	entityUsers := make([]*entity.User, 0)
-
 	for _, user := range users {
-		entityUsers = append(entityUsers, &entity.User{
-			ID:     user.ID,
-			Name:   user.Name,
-			Email:  user.Email,
-			Status: user.Status,
-		})
+		entityUsers = append(entityUsers, uu.convertToEntityUser(user))
 	}
-
 	return entityUsers
 }

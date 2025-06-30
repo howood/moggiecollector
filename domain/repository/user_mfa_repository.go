@@ -8,12 +8,8 @@ import (
 
 // UserRepository interface
 type UserMfaRepository interface {
-	GetAll(db *gorm.DB) ([]model.User, error)
-	GetAllWithInActive(db *gorm.DB) ([]model.User, error)
-	Get(db *gorm.DB, userID uuid.UUID) (model.User, error)
-	GetByIDAndEmail(db *gorm.DB, userID uuid.UUID, email string) (model.User, error)
-	GetByEmail(db *gorm.DB, email string) (model.User, error)
-	Create(db *gorm.DB, user *model.User) error
-	Update(db *gorm.DB, user *model.User) error
-	InActive(db *gorm.DB, userID uuid.UUID) error
+	Get(db *gorm.DB, userID uuid.UUID, mfaType model.MfaType) (*model.UserMfa, error)
+	GetDefault(db *gorm.DB, userID uuid.UUID) (*model.UserMfa, error)
+	UnsetDefault(db *gorm.DB, userID uuid.UUID, excludeMfaType model.MfaType) error
+	Upsert(db *gorm.DB, user *model.UserMfa) error
 }
