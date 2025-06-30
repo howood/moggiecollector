@@ -141,7 +141,7 @@ func (ch AccountHandler) Login(c echo.Context) error {
 	if err != nil {
 		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
-	token := ch.createToken(ctx, user.UserID, user.Email)
+	token := ch.createToken(ctx, user.ID, user.Email)
 
 	return c.JSONPretty(http.StatusOK, map[string]interface{}{"token": token}, marshalIndent)
 }
@@ -163,7 +163,7 @@ func (ch AccountHandler) convertToLoginrDto(user request.LoginUserForm) *dto.Log
 
 func (ch AccountHandler) responseUser(user *entity.User) response.UserResponse {
 	return response.UserResponse{
-		UserID: user.UserID,
+		ID:     user.ID,
 		Name:   user.Name,
 		Email:  user.Email,
 		Status: user.Status,

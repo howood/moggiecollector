@@ -7,5 +7,7 @@ CREATE TABLE request_logs (
   url_query   text,
   body   text,
   header   text,
-  created_at timestamp with time zone not null
+  created_at timestamp with time zone not null DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp with time zone not null DEFAULT CURRENT_TIMESTAMP,
+  deleted_at timestamp with time zone
 );

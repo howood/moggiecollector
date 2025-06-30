@@ -63,7 +63,7 @@ func (au *AccountUsecase) UpdateUser(ctx context.Context, userid uuid.UUID, user
 	if err != nil {
 		return err
 	}
-	user.UserID = userid
+	user.ID = userid
 	return au.DataStore.DBInstanceClient(ctx).Transaction(func(tx *gorm.DB) error {
 		return au.DataStore.DSRepository().UserRepository.Update(tx, &user)
 	})
@@ -109,7 +109,7 @@ func (au *AccountUsecase) convertToEntityUsers(users []model.User) []*entity.Use
 
 	for _, user := range users {
 		entityUsers = append(entityUsers, &entity.User{
-			UserID: user.UserID,
+			ID:     user.ID,
 			Name:   user.Name,
 			Email:  user.Email,
 			Status: user.Status,

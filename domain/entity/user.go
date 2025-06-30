@@ -6,7 +6,7 @@ import (
 )
 
 type User struct {
-	UserID uuid.UUID
+	ID     uuid.UUID
 	Name   string
 	Email  string
 	Status int64
@@ -14,7 +14,7 @@ type User struct {
 
 func NewUser(user *model.User) *User {
 	return &User{
-		UserID: user.UserID,
+		ID:     user.ID,
 		Name:   user.Name,
 		Email:  user.Email,
 		Status: user.Status,

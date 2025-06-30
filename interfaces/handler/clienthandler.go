@@ -31,7 +31,7 @@ func (ch ClientHandler) GetProfile(c echo.Context) error {
 
 func (ch ClientHandler) responseUser(user *entity.User) response.UserResponse {
 	return response.UserResponse{
-		UserID: user.UserID,
+		ID:     user.ID,
 		Name:   user.Name,
 		Email:  user.Email,
 		Status: user.Status,

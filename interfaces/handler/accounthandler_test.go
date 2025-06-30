@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/howood/moggiecollector/di/dbcluster"
@@ -22,7 +21,6 @@ import (
 func TestAccountHandler_GetUser(t *testing.T) {
 	t.Parallel()
 
-	now := time.Now()
 	type args struct {
 		id uuid.UUID
 	}
@@ -40,7 +38,7 @@ func TestAccountHandler_GetUser(t *testing.T) {
 			},
 			wantStatus: http.StatusOK,
 			want: response.UserResponse{
-				UserID: uuid.MustParse("dc059ab8-5569-492f-8229-939b7de055dc"),
+				ID:     uuid.MustParse("dc059ab8-5569-492f-8229-939b7de055dc"),
 				Name:   "xxxxxxx",
 				Email:  "xxxxxxx",
 				Status: 0,
@@ -58,24 +56,24 @@ func TestAccountHandler_GetUser(t *testing.T) {
 
 	initialData := []*model.User{
 		{
-			UserID:    uuid.MustParse("dc059ab8-5569-492f-8229-939b7de055dc"),
-			Name:      "xxxxxxx",
-			Email:     "xxxxxxx",
-			Password:  "xxxxxxx",
-			Salt:      "xxxxxxx",
-			Status:    0,
-			CreatedAt: now,
-			UpdatedAt: now,
+			BaseModel: model.BaseModel{
+				ID: uuid.MustParse("dc059ab8-5569-492f-8229-939b7de055dc"),
+			},
+			Name:     "xxxxxxx",
+			Email:    "xxxxxxx",
+			Password: "xxxxxxx",
+			Salt:     "xxxxxxx",
+			Status:   0,
 		},
 		{
-			UserID:    uuid.MustParse("64d9eee6-69b6-4a44-8980-55470a424434"),
-			Name:      "xxxxxxx2",
-			Email:     "xxxxxxx2",
-			Password:  "xxxxxxx2",
-			Salt:      "xxxxxxx2",
-			Status:    0,
-			CreatedAt: now,
-			UpdatedAt: now,
+			BaseModel: model.BaseModel{
+				ID: uuid.MustParse("64d9eee6-69b6-4a44-8980-55470a424434"),
+			},
+			Name:     "xxxxxxx2",
+			Email:    "xxxxxxx2",
+			Password: "xxxxxxx2",
+			Salt:     "xxxxxxx2",
+			Status:   0,
 		},
 	}
 

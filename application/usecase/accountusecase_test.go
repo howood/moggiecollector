@@ -3,7 +3,6 @@ package usecase_test
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/howood/moggiecollector/application/usecase"
@@ -19,7 +18,6 @@ import (
 func TestAccountUsecase_GetUsers(t *testing.T) {
 	t.Parallel()
 
-	now := time.Now()
 	tests := []struct {
 		name    string
 		want    []*entity.User
@@ -29,13 +27,13 @@ func TestAccountUsecase_GetUsers(t *testing.T) {
 			name: "正常系: 同じデータが取得できる",
 			want: []*entity.User{
 				{
-					UserID: uuid.MustParse("dc059ab8-5569-492f-8229-939b7de055dc"),
+					ID:     uuid.MustParse("dc059ab8-5569-492f-8229-939b7de055dc"),
 					Name:   "xxxxxxx",
 					Email:  "xxxxxxx",
 					Status: 0,
 				},
 				{
-					UserID: uuid.MustParse("64d9eee6-69b6-4a44-8980-55470a424434"),
+					ID:     uuid.MustParse("64d9eee6-69b6-4a44-8980-55470a424434"),
 					Name:   "xxxxxxx2",
 					Email:  "xxxxxxx2",
 					Status: 0,
@@ -47,24 +45,24 @@ func TestAccountUsecase_GetUsers(t *testing.T) {
 
 	initialData := []*model.User{
 		{
-			UserID:    uuid.MustParse("dc059ab8-5569-492f-8229-939b7de055dc"),
-			Name:      "xxxxxxx",
-			Email:     "xxxxxxx",
-			Password:  "xxxxxxx",
-			Salt:      "xxxxxxx",
-			Status:    0,
-			CreatedAt: now,
-			UpdatedAt: now,
+			BaseModel: model.BaseModel{
+				ID: uuid.MustParse("dc059ab8-5569-492f-8229-939b7de055dc"),
+			},
+			Name:     "xxxxxxx",
+			Email:    "xxxxxxx",
+			Password: "xxxxxxx",
+			Salt:     "xxxxxxx",
+			Status:   0,
 		},
 		{
-			UserID:    uuid.MustParse("64d9eee6-69b6-4a44-8980-55470a424434"),
-			Name:      "xxxxxxx2",
-			Email:     "xxxxxxx2",
-			Password:  "xxxxxxx2",
-			Salt:      "xxxxxxx2",
-			Status:    0,
-			CreatedAt: now,
-			UpdatedAt: now,
+			BaseModel: model.BaseModel{
+				ID: uuid.MustParse("64d9eee6-69b6-4a44-8980-55470a424434"),
+			},
+			Name:     "xxxxxxx2",
+			Email:    "xxxxxxx2",
+			Password: "xxxxxxx2",
+			Salt:     "xxxxxxx2",
+			Status:   0,
 		},
 	}
 
@@ -89,8 +87,7 @@ func TestAccountUsecase_GetUsers(t *testing.T) {
 			}
 			for _, gotuser := range got {
 				for _, wantuser := range tt.want {
-					if gotuser.UserID == wantuser.UserID {
-						assert.Equal(t, wantuser.UserID, gotuser.UserID)
+					if gotuser.ID == wantuser.ID {
 						assert.Equal(t, wantuser.Name, gotuser.Name)
 						assert.Equal(t, wantuser.Email, gotuser.Email)
 						assert.Equal(t, wantuser.Status, gotuser.Status)
@@ -109,7 +106,6 @@ func TestAccountUsecase_GetUser(t *testing.T) {
 		id uuid.UUID
 	}
 
-	now := time.Now()
 	tests := []struct {
 		name    string
 		args    args
@@ -122,7 +118,7 @@ func TestAccountUsecase_GetUser(t *testing.T) {
 				id: uuid.MustParse("dc059ab8-5569-492f-8229-939b7de055dc"),
 			},
 			want: &entity.User{
-				UserID: uuid.MustParse("dc059ab8-5569-492f-8229-939b7de055dc"),
+				ID:     uuid.MustParse("dc059ab8-5569-492f-8229-939b7de055dc"),
 				Name:   "xxxxxxx",
 				Email:  "xxxxxxx",
 				Status: 0,
@@ -143,24 +139,24 @@ func TestAccountUsecase_GetUser(t *testing.T) {
 
 	initialData := []*model.User{
 		{
-			UserID:    uuid.MustParse("dc059ab8-5569-492f-8229-939b7de055dc"),
-			Name:      "xxxxxxx",
-			Email:     "xxxxxxx",
-			Password:  "xxxxxxx",
-			Salt:      "xxxxxxx",
-			Status:    0,
-			CreatedAt: now,
-			UpdatedAt: now,
+			BaseModel: model.BaseModel{
+				ID: uuid.MustParse("dc059ab8-5569-492f-8229-939b7de055dc"),
+			},
+			Name:     "xxxxxxx",
+			Email:    "xxxxxxx",
+			Password: "xxxxxxx",
+			Salt:     "xxxxxxx",
+			Status:   0,
 		},
 		{
-			UserID:    uuid.MustParse("64d9eee6-69b6-4a44-8980-55470a424434"),
-			Name:      "xxxxxxx2",
-			Email:     "xxxxxxx2",
-			Password:  "xxxxxxx2",
-			Salt:      "xxxxxxx2",
-			Status:    0,
-			CreatedAt: now,
-			UpdatedAt: now,
+			BaseModel: model.BaseModel{
+				ID: uuid.MustParse("64d9eee6-69b6-4a44-8980-55470a424434"),
+			},
+			Name:     "xxxxxxx2",
+			Email:    "xxxxxxx2",
+			Password: "xxxxxxx2",
+			Salt:     "xxxxxxx2",
+			Status:   0,
 		},
 	}
 
@@ -182,7 +178,7 @@ func TestAccountUsecase_GetUser(t *testing.T) {
 				return
 			}
 
-			assert.Equal(t, tt.want.UserID, got.UserID)
+			assert.Equal(t, tt.want.ID, got.ID)
 			assert.Equal(t, tt.want.Name, got.Name)
 			assert.Equal(t, tt.want.Email, got.Email)
 			assert.Equal(t, tt.want.Status, got.Status)

@@ -20,28 +20,28 @@ func NewUserDao() repository.UserRepository {
 // GetAll is get all
 func (u *UsersDao) GetAll(db *gorm.DB) ([]model.User, error) {
 	users := make([]model.User, 0)
-	err := db.Where("status IN (?)", []model.UserStatus{model.UserStatusActive}).Where("deleted_at IS NULL").Order("user_id desc").Find(&users).Error
+	err := db.Where("status IN (?)", []model.UserStatus{model.UserStatusActive}).Where("deleted_at IS NULL").Order("id desc").Find(&users).Error
 	return users, err
 }
 
 // GetAllWithInActive is get all
 func (u *UsersDao) GetAllWithInActive(db *gorm.DB) ([]model.User, error) {
 	users := make([]model.User, 0)
-	err := db.Where("status IN (?)", []model.UserStatus{model.UserStatusActive, model.UserStatusInActive}).Where("deleted_at IS NULL").Order("user_id desc").Find(&users).Error
+	err := db.Where("status IN (?)", []model.UserStatus{model.UserStatusActive, model.UserStatusInActive}).Where("deleted_at IS NULL").Order("id desc").Find(&users).Error
 	return users, err
 }
 
 // Get is get by id
 func (u *UsersDao) Get(db *gorm.DB, userID uuid.UUID) (model.User, error) {
 	user := model.User{}
-	err := db.Where("status = ? AND user_id = ?", model.UserStatusActive, userID).Where("deleted_at IS NULL").First(&user).Error
+	err := db.Where("status = ? AND id = ?", model.UserStatusActive, userID).Where("deleted_at IS NULL").First(&user).Error
 	return user, err
 }
 
 // GetByIDAndEmail is get by id and email
 func (u *UsersDao) GetByIDAndEmail(db *gorm.DB, userID uuid.UUID, email string) (model.User, error) {
 	user := model.User{}
-	err := db.Where("status = ? AND user_id = ? AND email = ?", model.UserStatusActive, userID, email).Where("deleted_at IS NULL").First(&user).Error
+	err := db.Where("status = ? AND id = ? AND email = ?", model.UserStatusActive, userID, email).Where("deleted_at IS NULL").First(&user).Error
 	return user, err
 }
 
@@ -60,16 +60,16 @@ func (u *UsersDao) Create(db *gorm.DB, user *model.User) error {
 // Update is update exist user
 func (u *UsersDao) Update(db *gorm.DB, user *model.User) error {
 	return db.Model(&model.User{}).Where(
-		"status = ? AND user_id = ?",
+		"status = ? AND id = ?",
 		model.UserStatusActive,
-		user.UserID,
+		user.ID,
 	).Updates(user).Error
 }
 
 // InActive is update exist user
 func (u *UsersDao) InActive(db *gorm.DB, userID uuid.UUID) error {
 	return db.Model(&model.User{}).Where(
-		"status = ? AND user_id = ?",
+		"status = ? AND id = ?",
 		model.UserStatusActive,
 		userID,
 	).Update("status", model.UserStatusInActive).Error
