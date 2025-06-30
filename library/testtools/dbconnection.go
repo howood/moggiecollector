@@ -1,6 +1,7 @@
 package testtools
 
 import (
+	"context"
 	"testing"
 
 	"github.com/howood/moggiecollector/infrastructure/client"
@@ -10,9 +11,10 @@ import (
 func DBTx(t *testing.T) *gorm.DB {
 	t.Helper()
 
+	ctx := context.Background()
 	dataaccessor := client.NewDataStoreAccesser()
 
-	tx := dataaccessor.Instance.GetClient().WithContext(t.Context()).Begin()
+	tx := dataaccessor.Instance.GetClient().WithContext(ctx).Begin()
 	if tx.Error != nil {
 		t.Fatalf("Failed to start a transaction: %v", tx.Error)
 	}

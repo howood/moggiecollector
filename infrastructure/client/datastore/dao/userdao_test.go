@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-//nolint:funlen
+//nolint:funlen,tparallel
 func TestUserDao_GetAll(t *testing.T) {
 	t.Parallel()
 
@@ -71,10 +71,9 @@ func TestUserDao_GetAll(t *testing.T) {
 		},
 	}
 
+	//nolint:paralleltest
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
 			tx := testtools.DBTx(t)
 			if err := tx.Create(initialData).Error; err != nil {
 				t.Fatal(err)
@@ -103,7 +102,7 @@ func TestUserDao_GetAll(t *testing.T) {
 	}
 }
 
-//nolint:funlen
+//nolint:funlen,tparallel
 func TestUserDao_Get(t *testing.T) {
 	t.Parallel()
 
@@ -169,10 +168,9 @@ func TestUserDao_Get(t *testing.T) {
 		},
 	}
 
+	//nolint:paralleltest
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
 			tx := testtools.DBTx(t)
 			if err := tx.Create(initialData).Error; err != nil {
 				t.Fatal(err)

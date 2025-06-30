@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-//nolint:funlen
+//nolint:funlen,tparallel
 func TestAccountUsecase_GetUsers(t *testing.T) {
 	t.Parallel()
 
@@ -66,10 +66,9 @@ func TestAccountUsecase_GetUsers(t *testing.T) {
 		},
 	}
 
+	//nolint:paralleltest
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
 			ctx := context.Background()
 			tx := testtools.DBTx(t)
 			if err := tx.Create(initialData).Error; err != nil {
@@ -98,7 +97,7 @@ func TestAccountUsecase_GetUsers(t *testing.T) {
 	}
 }
 
-//nolint:funlen
+//nolint:funlen,tparallel
 func TestAccountUsecase_GetUser(t *testing.T) {
 	t.Parallel()
 
@@ -160,10 +159,9 @@ func TestAccountUsecase_GetUser(t *testing.T) {
 		},
 	}
 
+	//nolint:paralleltest
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
 			ctx := context.Background()
 			tx := testtools.DBTx(t)
 			if err := tx.Create(initialData).Error; err != nil {
@@ -186,6 +184,7 @@ func TestAccountUsecase_GetUser(t *testing.T) {
 	}
 }
 
+//nolint:tparallel
 func TestAccountUsecase_CreateUser(t *testing.T) {
 	t.Parallel()
 
@@ -212,10 +211,9 @@ func TestAccountUsecase_CreateUser(t *testing.T) {
 		},
 	}
 
+	//nolint:paralleltest
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
 			ctx := context.Background()
 			tx := testtools.DBTx(t)
 			dataStore := dbcluster.NewDatastoreForTest(tx)
