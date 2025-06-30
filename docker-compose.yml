@@ -1,7 +1,7 @@
 services:
   # moggiecollector
   moggiecollector:
-    image: golang:1.23
+    image: golang:1.24
     platform: linux/amd64
     working_dir: /go/src/github.com/howood/moggiecollector
     expose:
