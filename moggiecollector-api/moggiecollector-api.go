@@ -30,11 +30,11 @@ func main() {
 
 	v1AdminAPI := e.Group("/admin/v1", custommiddleware.RequestLog(sccluster))
 
-	v1AdminAPI.GET("/users", handler.AccountHandler{BaseHandler: baseHandler}.GetUsers)
-	v1AdminAPI.GET("/users/:id", handler.AccountHandler{BaseHandler: baseHandler}.GetUser)
-	v1AdminAPI.POST("/users", handler.AccountHandler{BaseHandler: baseHandler}.CreateUser)
-	v1AdminAPI.PUT("/users/:id", handler.AccountHandler{BaseHandler: baseHandler}.UpdateUser)
-	v1AdminAPI.DELETE("/users/:id", handler.AccountHandler{BaseHandler: baseHandler}.InActiveUser)
+	v1AdminAPI.GET("/users", handler.UserHandler{BaseHandler: baseHandler}.GetUsers)
+	v1AdminAPI.GET("/users/:id", handler.UserHandler{BaseHandler: baseHandler}.GetUser)
+	v1AdminAPI.POST("/users", handler.UserHandler{BaseHandler: baseHandler}.CreateUser)
+	v1AdminAPI.PUT("/users/:id", handler.UserHandler{BaseHandler: baseHandler}.UpdateUser)
+	v1AdminAPI.DELETE("/users/:id", handler.UserHandler{BaseHandler: baseHandler}.InActiveUser)
 
 	jwtconfig := echojwt.Config{
 		Skipper: custommiddleware.OptionsMethodSkipper,
@@ -45,8 +45,8 @@ func main() {
 		ContextKey: actor.JWTContextKey,
 	}
 	v1API := e.Group("/api/v1", custommiddleware.RequestLog(sccluster))
-	v1API.POST("/login", handler.AccountHandler{BaseHandler: baseHandler}.Login)
-	v1API.GET("/profile", handler.ClientHandler{}.GetProfile, echojwt.WithConfig(jwtconfig))
+	v1API.POST("/login", handler.AuthHandler{BaseHandler: baseHandler}.Login)
+	v1API.GET("/profile", handler.UserHandler{}.GetProfile, echojwt.WithConfig(jwtconfig))
 
 	e.Logger.Fatal(e.Start(":" + defaultPort))
 }

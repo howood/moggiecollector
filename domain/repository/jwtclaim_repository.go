@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// JwtClaimsRepository interface
-type JwtClaimsRepository interface {
+// JwtClaimRepository interface
+type JwtClaimRepository interface {
 	CreateToken(ctx context.Context, userID uuid.UUID, username string, admin bool, identifier string) string
 }

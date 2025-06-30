@@ -77,7 +77,7 @@ func TestAccountUsecase_GetUsers(t *testing.T) {
 			}
 			dataStore := dbcluster.NewDatastoreForTest(tx)
 
-			au := usecase.NewAccountUsecase(dataStore)
+			au := usecase.NewUserUsecase(dataStore)
 
 			got, err := au.GetUsers(ctx, "true")
 			if !tt.wantErr(t, err) {
@@ -171,7 +171,7 @@ func TestAccountUsecase_GetUser(t *testing.T) {
 			}
 			dataStore := dbcluster.NewDatastoreForTest(tx)
 
-			au := usecase.NewAccountUsecase(dataStore)
+			au := usecase.NewUserUsecase(dataStore)
 
 			got, err := au.GetUser(ctx, tt.args.id)
 			if !tt.wantErr(t, err) || err != nil {
@@ -219,7 +219,7 @@ func TestAccountUsecase_CreateUser(t *testing.T) {
 			ctx := context.Background()
 			tx := testtools.DBTx(t)
 			dataStore := dbcluster.NewDatastoreForTest(tx)
-			au := usecase.NewAccountUsecase(dataStore)
+			au := usecase.NewUserUsecase(dataStore)
 
 			err := au.CreateUser(ctx, tt.args.input)
 			if !tt.wantErr(t, err) || err != nil {

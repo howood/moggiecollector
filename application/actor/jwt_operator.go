@@ -28,7 +28,7 @@ const JWTContextKey = "moggiecollector"
 
 // JwtOperator struct
 type JwtOperator struct {
-	repository.JwtClaimsRepository
+	repository.JwtClaimRepository
 }
 
 // NewJwtOperator creates a new JwtClaimsRepository

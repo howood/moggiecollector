@@ -7,14 +7,14 @@ import (
 
 // DataStore interface.
 type UsecaseCluster struct {
-	AccountUC *usecase.AccountUsecase
-	ClientUC  *usecase.ClientUsecase
+	AuthUC *usecase.AuthUsecase
+	UserUC *usecase.UserUsecase
 }
 
 // NewDatastore returns DataStore interface.
 func NewUsecaseCluster(datastore dbcluster.DataStore) *UsecaseCluster {
 	return &UsecaseCluster{
-		AccountUC: usecase.NewAccountUsecase(datastore),
-		ClientUC:  usecase.NewClientUsecase(datastore),
+		AuthUC: usecase.NewAuthUsecase(datastore),
+		UserUC: usecase.NewUserUsecase(datastore),
 	}
 }

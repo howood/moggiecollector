@@ -12,49 +12,49 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// AccountHandler struct
-type AccountHandler struct {
+// UserHandler struct
+type UserHandler struct {
 	BaseHandler
 }
 
 // GetUsers is get all users
-func (ch AccountHandler) GetUsers(c echo.Context) error {
+func (uh UserHandler) GetUsers(c echo.Context) error {
 	requesturi := c.Request().URL.RequestURI()
-	ctx := ch.initalGenerateContext(c)
+	ctx := uh.initalGenerateContext(c)
 	log.Info(ctx, "========= START REQUEST : "+requesturi)
 	log.Info(ctx, c.Request().Method)
 	log.Info(ctx, c.Request().Header)
 	withinactive := c.QueryParam("withinactive")
-	users, err := ch.UcCluster.AccountUC.GetUsers(ctx, withinactive)
+	users, err := uh.UcCluster.UserUC.GetUsers(ctx, withinactive)
 	if err != nil {
-		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
+		return uh.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
-	return c.JSONPretty(http.StatusOK, ch.responseUsers(users), marshalIndent)
+	return c.JSONPretty(http.StatusOK, uh.responseUsers(users), marshalIndent)
 }
 
 // GetUser is get all users
-func (ch AccountHandler) GetUser(c echo.Context) error {
+func (uh UserHandler) GetUser(c echo.Context) error {
 	requesturi := c.Request().URL.RequestURI()
-	ctx := ch.initalGenerateContext(c)
+	ctx := uh.initalGenerateContext(c)
 	log.Info(ctx, "========= START REQUEST : "+requesturi)
 	log.Info(ctx, c.Request().Method)
 	log.Info(ctx, c.Request().Header)
 
 	userid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
+		return uh.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
-	user, err := ch.UcCluster.AccountUC.GetUser(ctx, userid)
+	user, err := uh.UcCluster.UserUC.GetUser(ctx, userid)
 	if err != nil {
-		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
+		return uh.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
-	return c.JSONPretty(http.StatusOK, ch.responseUser(user), marshalIndent)
+	return c.JSONPretty(http.StatusOK, uh.responseUser(user), marshalIndent)
 }
 
 // CreateUser is get all users
-func (ch AccountHandler) CreateUser(c echo.Context) error {
+func (uh UserHandler) CreateUser(c echo.Context) error {
 	requesturi := c.Request().URL.RequestURI()
-	ctx := ch.initalGenerateContext(c)
+	ctx := uh.initalGenerateContext(c)
 	log.Info(ctx, "========= START REQUEST : "+requesturi)
 	log.Info(ctx, c.Request().Method)
 	log.Info(ctx, c.Request().Header)
@@ -64,89 +64,80 @@ func (ch AccountHandler) CreateUser(c echo.Context) error {
 		err = c.Bind(&form)
 	}
 	if err == nil {
-		err = ch.validate(form)
+		err = uh.validate(form)
 	}
 	if err != nil {
-		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
+		return uh.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
-	err = ch.UcCluster.AccountUC.CreateUser(ctx, ch.convertToUserDto(form))
+	err = uh.UcCluster.UserUC.CreateUser(ctx, uh.convertToUserDto(form))
 	if err != nil {
-		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
+		return uh.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
 	return c.JSONPretty(http.StatusOK, map[string]interface{}{"message": "success"}, marshalIndent)
 }
 
 // CreateUser is get all users
-func (ch AccountHandler) UpdateUser(c echo.Context) error {
+func (uh UserHandler) UpdateUser(c echo.Context) error {
 	requesturi := c.Request().URL.RequestURI()
-	ctx := ch.initalGenerateContext(c)
+	ctx := uh.initalGenerateContext(c)
 	log.Info(ctx, "========= START REQUEST : "+requesturi)
 	log.Info(ctx, c.Request().Method)
 	log.Info(ctx, c.Request().Header)
 
 	userid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
+		return uh.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
 
 	form := request.CreateUserForm{}
 	if err = c.Bind(&form); err != nil {
-		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
+		return uh.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
-	if err = ch.validate(form); err != nil {
-		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
+	if err = uh.validate(form); err != nil {
+		return uh.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
-	err = ch.UcCluster.AccountUC.UpdateUser(ctx, userid, ch.convertToUserDto(form))
+	err = uh.UcCluster.UserUC.UpdateUser(ctx, userid, uh.convertToUserDto(form))
 	if err != nil {
-		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
+		return uh.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
 	return c.JSONPretty(http.StatusOK, map[string]interface{}{"message": "success"}, marshalIndent)
 }
 
 // InActiveUser is get all users
-func (ch AccountHandler) InActiveUser(c echo.Context) error {
+func (uh UserHandler) InActiveUser(c echo.Context) error {
 	requesturi := c.Request().URL.RequestURI()
-	ctx := ch.initalGenerateContext(c)
+	ctx := uh.initalGenerateContext(c)
 	log.Info(ctx, "========= START REQUEST : "+requesturi)
 	log.Info(ctx, c.Request().Method)
 	log.Info(ctx, c.Request().Header)
 
 	userid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
+		return uh.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
 
-	if err := ch.UcCluster.AccountUC.InActiveUser(ctx, userid); err != nil {
-		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
+	if err := uh.UcCluster.UserUC.InActiveUser(ctx, userid); err != nil {
+		return uh.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
 	return c.JSONPretty(http.StatusOK, map[string]interface{}{"message": "success"}, marshalIndent)
 }
 
-// Login is Login user
-func (ch AccountHandler) Login(c echo.Context) error {
+// GetProfile is get logined user
+func (uh UserHandler) GetProfile(c echo.Context) error {
 	requesturi := c.Request().URL.RequestURI()
-	ctx := ch.initalGenerateContext(c)
+	ctx := uh.initalGenerateContext(c)
 	log.Info(ctx, "========= START REQUEST : "+requesturi)
 	log.Info(ctx, c.Request().Method)
 	log.Info(ctx, c.Request().Header)
-	form := request.LoginUserForm{}
-	if err := c.Bind(&form); err != nil {
-		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
-	}
-	if err := ch.validate(form); err != nil {
-		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
-	}
-
-	user, err := ch.UcCluster.AccountUC.AuthUser(ctx, ch.convertToLoginrDto(form))
+	claims := uh.getClaimsFromToken(c)
+	user, err := uh.UcCluster.UserUC.GetUserByToken(ctx, claims)
 	if err != nil {
-		return ch.errorResponse(ctx, c, http.StatusBadRequest, err)
+		return uh.errorResponse(ctx, c, http.StatusBadRequest, err)
 	}
-	token := ch.createToken(ctx, user.ID, user.Email)
-
-	return c.JSONPretty(http.StatusOK, map[string]interface{}{"token": token}, marshalIndent)
+	return c.JSONPretty(http.StatusOK, uh.responseUser(user), marshalIndent)
 }
 
-func (ch AccountHandler) convertToUserDto(user request.CreateUserForm) *dto.UserDto {
+func (uh UserHandler) convertToUserDto(user request.CreateUserForm) *dto.UserDto {
 	return &dto.UserDto{
 		Name:     user.Name,
 		Email:    user.Email,
@@ -154,14 +145,14 @@ func (ch AccountHandler) convertToUserDto(user request.CreateUserForm) *dto.User
 	}
 }
 
-func (ch AccountHandler) convertToLoginrDto(user request.LoginUserForm) *dto.LoginDto {
+func (uh UserHandler) convertToLoginrDto(user request.LoginUserForm) *dto.LoginDto {
 	return &dto.LoginDto{
 		Email:    user.Email,
 		Password: user.Password,
 	}
 }
 
-func (ch AccountHandler) responseUser(user *entity.User) response.UserResponse {
+func (uh UserHandler) responseUser(user *entity.User) response.UserResponse {
 	return response.UserResponse{
 		ID:     user.ID,
 		Name:   user.Name,
@@ -170,11 +161,11 @@ func (ch AccountHandler) responseUser(user *entity.User) response.UserResponse {
 	}
 }
 
-func (ch AccountHandler) responseUsers(users []*entity.User) []response.UserResponse {
+func (uh UserHandler) responseUsers(users []*entity.User) []response.UserResponse {
 	resUsers := make([]response.UserResponse, 0)
 
 	for _, user := range users {
-		resUsers = append(resUsers, ch.responseUser(user))
+		resUsers = append(resUsers, uh.responseUser(user))
 	}
 
 	return resUsers

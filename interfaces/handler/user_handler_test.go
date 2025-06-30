@@ -97,7 +97,7 @@ func TestAccountHandler_GetUser(t *testing.T) {
 			c.SetParamNames("id")
 			c.SetParamValues(tt.args.id.String())
 
-			h := &handler.AccountHandler{BaseHandler: baseHandler}
+			h := &handler.UserHandler{BaseHandler: baseHandler}
 
 			if assert.NoError(t, h.GetUser(c)) {
 				assert.Equal(t, tt.wantStatus, rec.Code)
