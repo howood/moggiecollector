@@ -8,10 +8,10 @@ import (
 )
 
 type User struct {
-	ID     uuid.UUID
-	Name   string
-	Email  string
-	Status int64
+	ID     uuid.UUID `json:"id"`
+	Name   string    `json:"name"`
+	Email  string    `json:"email"`
+	Status int64     `json:"status"`
 }
 
 func NewUser(user *model.User) *User {

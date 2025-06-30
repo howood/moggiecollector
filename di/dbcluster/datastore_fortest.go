@@ -21,7 +21,7 @@ type DataStoreTest struct {
 //
 //nolint:ireturn
 func NewDatastoreForTest(testTx *gorm.DB) DataStore {
-	dataaccessor := client.NewDatastorAssessor()
+	dataaccessor := client.NewDataStoreAccesser()
 
 	return &DataStoreTest{
 		dsRepository: &DataStoreRepository{

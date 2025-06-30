@@ -30,11 +30,12 @@ func NewUserMfaUsecase(dataStore dbcluster.DataStore, svCluster *svcluster.Servi
 }
 
 func (uc *UserMfaUsecase) UpsertAuthenticator(ctx context.Context, req *dto.UserMfaTotpDto) error {
-	ok, err := uc.SvCluster.AuthenticatorSV.ValidateBySecretString(ctx, req.Passcode, req.Secret)
+	ok, err := uc.SvCluster.AuthenticatorSV.ValidateBySecretString(req.Passcode, req.Secret)
 	if err != nil {
 		return fmt.Errorf("failed to validate passcode: %w", err)
 	}
 	if !ok {
+		//nolint:err113
 		return errors.New("invalid passcode")
 	}
 	userMfa, err := uc.DataStore.DSRepository().UserMfaRepository.Get(uc.DataStore.DBInstanceClient(ctx), req.UserID, model.MfaTypeTOTP)
@@ -63,8 +64,8 @@ func (uc *UserMfaUsecase) UpsertAuthenticator(ctx context.Context, req *dto.User
 	})
 }
 
-func (uc *UserMfaUsecase) GetAuthenticatorSecret(ctx context.Context, userID uuid.UUID) (string, error) {
-	return uc.SvCluster.AuthenticatorSV.GenerateSecret(ctx, userID)
+func (uc *UserMfaUsecase) GetAuthenticatorSecret(_ context.Context, userID uuid.UUID) (string, error) {
+	return uc.SvCluster.AuthenticatorSV.GenerateSecret(userID)
 }
 
 func (uc *UserMfaUsecase) GetDefaultMfa(ctx context.Context, userID uuid.UUID) (*entity.MfaType, error) {
@@ -73,6 +74,7 @@ func (uc *UserMfaUsecase) GetDefaultMfa(ctx context.Context, userID uuid.UUID) (
 		return nil, err
 	}
 	if accountMfa == nil {
+		//nolint:nilnil
 		return nil, nil
 	}
 	mfaType := entity.MfaType(accountMfa.MfaType)
@@ -85,6 +87,7 @@ func (uc *UserMfaUsecase) ValidateAuthenticatorCode(ctx context.Context, verifyM
 		return false, nil, err
 	}
 	if !ok {
+		//nolint:err113
 		return false, nil, errors.New("invalid identifier")
 	}
 
@@ -99,6 +102,7 @@ func (uc *UserMfaUsecase) ValidateAuthenticatorCode(ctx context.Context, verifyM
 			return false, nil, fmt.Errorf("failed to validate passcode: %w", err)
 		}
 		if !ok {
+			//nolint:err113
 			return false, nil, errors.New("invalid passcode")
 		}
 		if err := uc.SvCluster.AuthCacheSV.Del(ctx, verifyMfaAuthenticator.Identifier); err != nil {
@@ -106,6 +110,7 @@ func (uc *UserMfaUsecase) ValidateAuthenticatorCode(ctx context.Context, verifyM
 		}
 		return true, &user, nil
 	default:
+		//nolint:err113
 		return false, nil, fmt.Errorf("unexpected type %T for identifier", val)
 	}
 }

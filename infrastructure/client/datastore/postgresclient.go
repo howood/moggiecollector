@@ -14,9 +14,12 @@ import (
 )
 
 var (
+	//nolint:gochecknoglobals
 	dbInstance *gorm.DB
-	dbOnce     sync.Once
-	dbMutex    sync.Mutex
+	//nolint:gochecknoglobals
+	dbOnce sync.Once
+	//nolint:gochecknoglobals
+	dbMutex sync.Mutex
 )
 
 // PostgresClient is PostgreSQL Client.
@@ -49,7 +52,6 @@ func generateConnection() *gorm.DB {
 			if !strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
 				panic(err)
 			}
-
 		}
 		dbInstance = db
 	})

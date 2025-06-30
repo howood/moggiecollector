@@ -20,6 +20,7 @@ type requestLogService struct {
 	DataStore dbcluster.DataStore
 }
 
+//nolint:ireturn
 func NewRequestLogService(dataStore dbcluster.DataStore) RequestLogService {
 	return &requestLogService{
 		DataStore: dataStore,

@@ -31,7 +31,7 @@ install-go-test-tparse:
 	go install github.com/mfridman/tparse@latest
 
 lint:
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.62.2 &&  \
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v2.2.1 &&  \
 	./bin/golangci-lint run ./...
 
 fmt:

@@ -113,6 +113,7 @@ func (uu *UserUsecase) convertToEntityUser(user model.User) *entity.User {
 		Status: user.Status,
 	}
 }
+
 func (uu *UserUsecase) convertToEntityUsers(users []model.User) []*entity.User {
 	entityUsers := make([]*entity.User, 0)
 	for _, user := range users {

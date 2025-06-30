@@ -7,6 +7,7 @@ const (
 
 type RequestLog struct {
 	BaseModel
+
 	XRequestID string
 	Endpoint   string
 	Method     string

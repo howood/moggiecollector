@@ -11,13 +11,13 @@ import (
 	"github.com/howood/moggiecollector/library/utils"
 )
 
-// Validator struct
+// Validator struct.
 type Validator struct {
 	validate *val.Validate
 	trans    ut.Translator
 }
 
-// NewValidator creates a new Validator
+// NewValidator creates a new Validator.
 func NewValidator() *Validator {
 	en := en.New()
 	uni := ut.New(en, en)
@@ -32,7 +32,7 @@ func NewValidator() *Validator {
 	return I
 }
 
-// Validate process to validate
+// Validate process to validate.
 func (v *Validator) Validate(structData interface{}) error {
 	err := v.validate.Struct(structData)
 	if err != nil {

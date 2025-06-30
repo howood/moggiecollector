@@ -7,9 +7,10 @@ const (
 	UserStatusInActive
 )
 
-// User entity
+// User entity.
 type User struct {
 	BaseModel
+
 	Name     string
 	Email    string `gorm:"index:users_email_index"`
 	Password string

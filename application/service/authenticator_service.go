@@ -11,9 +11,9 @@ import (
 )
 
 type AuthenticatorService interface {
-	GenerateSecret(ctx context.Context, userID uuid.UUID) (string, error)
+	GenerateSecret(userID uuid.UUID) (string, error)
 	Validate(ctx context.Context, userID uuid.UUID, passcode string) (bool, error)
-	ValidateBySecretString(ctx context.Context, passcode string, secret string) (bool, error)
+	ValidateBySecretString(passcode string, secret string) (bool, error)
 }
 
 type authenticatorSv struct {
@@ -22,6 +22,8 @@ type authenticatorSv struct {
 }
 
 // NewAuthenticatorService creates a AuthenticatorService.
+//
+//nolint:ireturn
 func NewAuthenticatorService(dataStore dbcluster.DataStore) AuthenticatorService {
 	return &authenticatorSv{
 		authenticator: mfa.NewAuthenticator(),
@@ -29,7 +31,7 @@ func NewAuthenticatorService(dataStore dbcluster.DataStore) AuthenticatorService
 	}
 }
 
-func (as *authenticatorSv) GenerateSecret(ctx context.Context, userID uuid.UUID) (string, error) {
+func (as *authenticatorSv) GenerateSecret(userID uuid.UUID) (string, error) {
 	return as.authenticator.GenerateKey(userID, config.TotpPeriod)
 }
 
@@ -41,6 +43,6 @@ func (as *authenticatorSv) Validate(ctx context.Context, userID uuid.UUID, passc
 	return as.authenticator.Validate(passcode, userMfa.Secret, config.TotpPeriod)
 }
 
-func (as *authenticatorSv) ValidateBySecretString(ctx context.Context, passcode string, secret string) (bool, error) {
+func (as *authenticatorSv) ValidateBySecretString(passcode string, secret string) (bool, error) {
 	return as.authenticator.Validate(passcode, secret, config.TotpPeriod)
 }

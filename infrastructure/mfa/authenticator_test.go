@@ -49,6 +49,8 @@ func TestAuthenticator_GenerateKey(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			authenticator := mfa.NewAuthenticator()
 
 			secret, err := authenticator.GenerateKey(tt.args.accountID, tt.args.period)
@@ -78,6 +80,7 @@ func TestAuthenticator_GenerateKey_Uniqueness(t *testing.T) {
 	assert.NotEqual(t, secret1, secret2, "異なる秘密鍵が生成されるべき")
 }
 
+//nolint:funlen
 func TestAuthenticator_Validate(t *testing.T) {
 	t.Parallel()
 
@@ -137,6 +140,8 @@ func TestAuthenticator_Validate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			authenticator := mfa.NewAuthenticator()
 
 			got, err := authenticator.Validate(tt.args.passcode, tt.args.secret, tt.args.period)

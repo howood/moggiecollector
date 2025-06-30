@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// UserRepository interface
+// UserRepository interface.
 type UserRepository interface {
 	GetAll(db *gorm.DB) ([]model.User, error)
 	GetAllWithInActive(db *gorm.DB) ([]model.User, error)

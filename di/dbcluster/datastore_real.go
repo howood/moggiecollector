@@ -24,7 +24,7 @@ type DataStoreReal struct {
 //
 //nolint:ireturn
 func NewDatastore() DataStore {
-	dataaccessor := client.NewDatastorAssessor()
+	dataaccessor := client.NewDataStoreAccesser()
 	tables := []interface{}{
 		&model.User{},
 		&model.UserMfa{},

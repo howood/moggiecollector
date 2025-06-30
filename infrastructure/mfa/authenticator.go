@@ -24,19 +24,6 @@ func NewAuthenticator() *Authenticator {
 	}
 }
 
-func (a *Authenticator) initializeKey(userID uuid.UUID, period uint) (*otp.Key, error) {
-	return totp.Generate(totp.GenerateOpts{
-		Issuer:      a.issuer,
-		AccountName: userID.String(),
-		Period:      period,
-		SecretSize:  secretSize,
-		Secret:      nil,
-		Digits:      otp.DigitsSix,
-		Algorithm:   otp.AlgorithmSHA1,
-		Rand:        rand.Reader,
-	})
-}
-
 func (a *Authenticator) GenerateKey(userID uuid.UUID, period uint) (string, error) {
 	key, err := a.initializeKey(userID, period)
 	if err != nil {
@@ -52,5 +39,18 @@ func (a *Authenticator) Validate(passcode, secret string, period uint) (bool, er
 		Skew:      1,
 		Digits:    otp.DigitsSix,
 		Algorithm: otp.AlgorithmSHA1,
+	})
+}
+
+func (a *Authenticator) initializeKey(userID uuid.UUID, period uint) (*otp.Key, error) {
+	return totp.Generate(totp.GenerateOpts{
+		Issuer:      a.issuer,
+		AccountName: userID.String(),
+		Period:      period,
+		SecretSize:  secretSize,
+		Secret:      nil,
+		Digits:      otp.DigitsSix,
+		Algorithm:   otp.AlgorithmSHA1,
+		Rand:        rand.Reader,
 	})
 }

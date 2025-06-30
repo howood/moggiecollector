@@ -2,6 +2,10 @@ package entity
 
 import "github.com/ory/x/randx"
 
+const (
+	identifierLength = 128
+)
+
 type VerifyMfa struct {
 	Identifier string
 }
@@ -13,7 +17,7 @@ func NewVerifyMfa() *VerifyMfa {
 }
 
 func generateIdentifier() string {
-	result, err := randx.RuneSequence(128, randx.AlphaLower)
+	result, err := randx.RuneSequence(identifierLength, randx.AlphaLower)
 	if err != nil {
 		panic(err)
 	}

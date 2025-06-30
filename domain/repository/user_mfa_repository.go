@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// UserRepository interface
+// UserRepository interface.
 type UserMfaRepository interface {
 	Get(db *gorm.DB, userID uuid.UUID, mfaType model.MfaType) (*model.UserMfa, error)
 	GetDefault(db *gorm.DB, userID uuid.UUID) (*model.UserMfa, error)

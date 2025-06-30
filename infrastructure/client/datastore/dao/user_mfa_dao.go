@@ -8,12 +8,10 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-// UserMfaDao struct
+// UserMfaDao struct.
 type UserMfaDao struct{}
 
-// NewUserMfaDao creates a new UserMfaRepository
-//
-//nolint:ireturn
+// NewUserMfaDao creates a new UserMfaRepository.
 func NewUserMfaDao() repository.UserMfaRepository {
 	return &UserMfaDao{}
 }

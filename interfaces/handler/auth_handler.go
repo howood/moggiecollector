@@ -43,6 +43,10 @@ func (ah AuthHandler) Login(c echo.Context) error {
 	switch mfaType {
 	case entity.MfaTypeTOTP:
 		return c.JSONPretty(http.StatusOK, map[string]interface{}{"identifier": verifyMfa.Identifier, "mfa_type": mfaType}, marshalIndent)
+	case entity.MfaTypeWebAuthn:
+		// MfaTypeWebAuthn MFA is not supported in this version
+		//nolint:err113
+		return ah.errorResponse(ctx, c, http.StatusNotImplemented, errors.New("MfaTypeWebAuthn MFA is not supported in this version"))
 	default:
 		token := ah.createToken(ctx, user.ID, user.Email)
 		return c.JSONPretty(http.StatusOK, map[string]interface{}{"token": token}, marshalIndent)
@@ -73,6 +77,7 @@ func (ah AuthHandler) VerifyAuthenticator(c echo.Context) error {
 		return ah.errorResponse(ctx, c, http.StatusInternalServerError, err)
 	}
 	if !isValid {
+		//nolint:err113
 		return ah.errorResponse(ctx, c, http.StatusUnauthorized, errors.New("invalid passcode"))
 	}
 
